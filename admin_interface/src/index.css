@@ -1,0 +1,225 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap');
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+ html {
+  font-family: 'Inter', system-ui, sans-serif;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+  body {
+    @apply bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
+  }
+
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary-500 rounded-lg;
+  }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-primary-300 dark:bg-primary-800 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-primary-600; }
+
+  h1, h2, h3, h4 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+
+  /* ── Boutons ── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2
+    text-white text-sm font-semibold px-4 py-2.5 rounded-xl
+    transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    background: linear-gradient(135deg, #16a34a, #15803d);
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.35);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #15803d, #166534);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.45);
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2
+    bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700
+    text-gray-700 dark:text-gray-200 text-sm font-semibold px-4 py-2.5
+    rounded-xl border border-gray-200 dark:border-gray-700
+    transition-all duration-200;
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2
+    text-white text-sm font-semibold px-4 py-2.5 rounded-xl
+    transition-all duration-200;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  }
+
+  .btn-danger:hover {
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+    transform: translateY(-1px);
+  }
+
+  /* ── Cartes ── */
+  .carte {
+    @apply bg-white dark:bg-gray-900 rounded-2xl
+    border border-gray-100 dark:border-gray-800
+    transition-all duration-200 p-5;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  }
+
+  .carte:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    transform: translateY(-1px);
+  }
+
+  .carte-stat {
+    @apply carte flex items-center gap-4;
+  }
+
+  /* ── Formulaires ── */
+  .input {
+    @apply w-full border border-gray-200 dark:border-gray-700 rounded-xl
+    px-4 py-2.5 text-sm bg-white dark:bg-gray-800
+    text-gray-800 dark:text-white
+    placeholder-gray-400 dark:placeholder-gray-500
+    focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20
+    transition-all duration-200 outline-none;
+  }
+
+  .label {
+    @apply block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5;
+  }
+
+  /* ── Tableaux ── */
+  .table-container {
+    @apply bg-white dark:bg-gray-900 rounded-2xl
+    border border-gray-100 dark:border-gray-800
+    overflow-hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+  }
+
+  .entete-tableau {
+    @apply text-left px-5 py-3.5 text-xs font-bold
+    text-gray-700 dark:text-gray-200 uppercase tracking-wider
+    bg-gray-100 dark:bg-gray-800;
+  }
+
+  .cellule-tableau {
+    @apply px-5 py-4 text-sm text-gray-700 dark:text-gray-300;
+  }
+
+  .ligne-tableau {
+    @apply hover:bg-primary-50/80 dark:hover:bg-gray-800/60
+    transition-colors duration-150 cursor-default;
+  }
+
+  /* ── Textes ── */
+  .titre-page {
+    @apply text-2xl font-bold text-gray-900 dark:text-white tracking-tight;
+  }
+
+  .sous-titre {
+    @apply text-sm text-gray-500 dark:text-gray-400 mt-0.5;
+  }
+
+  .titre-section {
+    @apply text-base font-semibold text-gray-800 dark:text-gray-100;
+  }
+
+  /* ── Pied de tableau ── */
+  .pied-tableau {
+    @apply px-5 py-3 border-t border-gray-200 dark:border-gray-700
+    bg-gray-100 dark:bg-gray-800;
+  }
+
+  /* ── Barre de recherche ── */
+  .barre-recherche {
+    @apply flex items-center gap-2 bg-white dark:bg-gray-800
+    border border-gray-200 dark:border-gray-700 rounded-xl
+    px-4 py-2.5 focus-within:ring-2 focus-within:ring-primary-500/20
+    focus-within:border-primary-400 transition-all duration-200;
+  }
+
+  /* ── Séparateur ── */
+  .separateur {
+    @apply border-t border-gray-100 dark:border-gray-800;
+  }
+
+  /* ── Badge statut ── */
+  .badge-success {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg
+    text-xs font-semibold bg-primary-100 text-primary-700
+    dark:bg-primary-900/50 dark:text-primary-400;
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg
+    text-xs font-semibold bg-gold-100 text-gold-700
+    dark:bg-gold-900/50 dark:text-gold-400;
+  }
+
+  .badge-danger {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg
+    text-xs font-semibold bg-red-100 text-red-600
+    dark:bg-red-900/50 dark:text-red-400;
+  }
+
+  .badge-info {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg
+    text-xs font-semibold bg-teal-100 text-teal-700
+    dark:bg-teal-900/50 dark:text-teal-400;
+  }
+
+  .badge-neutral {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg
+    text-xs font-semibold bg-gray-100 text-gray-600
+    dark:bg-gray-800 dark:text-gray-400;
+  }
+
+  /* ── Listes déroulantes mode sombre ── */
+select {
+  color-scheme: light;
+}
+
+.dark select {
+  color-scheme: dark;
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+
+.dark select option {
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+
+.dark select:focus {
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+
+:root {
+  --dropdown-bg: #ffffff;
+}
+
+.dark {
+  --dropdown-bg: #1f2937;
+}
+}
