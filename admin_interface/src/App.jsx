@@ -10,6 +10,8 @@ import Parametres from "./pages/Parametres";
 import Aide from "./pages/Aide";
 import Connexion from "./pages/Connexion";
 import { useAuth } from "./context/AuthContext";
+import AgentInscription from './pages/agents/AgentInscription';
+import AgentsTerrainPage  from './pages/agents/AgentsTerrainPage';
 
 // Route protégée — redirige vers /connexion si non connecté
 const RouteProtegee = ({ children }) => {
@@ -56,6 +58,12 @@ const App = () => {
           <Route path="rapports" element={<Rapports />} />
           <Route path="parametres" element={<Parametres />} />
           <Route path="aide" element={<Aide />} />
+          
+            {/* ── Agents de terrain ── */}
+
+      <Route path="agents"         element={<AgentsTerrainPage />} />
+      <Route path="agents/nouveau" element={<AgentInscription onSuccess={(data) => console.log('Agent créé :', data)} onCancel={() => window.history.back()}
+  />} />
         </Route>
 
         {/* Route inconnue */}

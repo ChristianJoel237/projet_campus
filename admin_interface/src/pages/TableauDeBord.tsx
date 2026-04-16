@@ -52,11 +52,12 @@ const TableauDeBord = () => {
 
   const formaterMontant = (montant: number): string =>
     new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
-  
+
   const obtenirSalutation = (): string => {
     const heure = maintenant.getHours();
     if (heure >= 5 && heure < 12) return t.commun?.bonjour || "Bonjour";
-    if (heure >= 12 && heure < 18) return t.commun?.bonApresMidi || "Bon après-midi";
+    if (heure >= 12 && heure < 18)
+      return t.commun?.bonApresMidi || "Bon après-midi";
     return t.commun?.bonsoir || "Bonsoir";
   };
 
@@ -85,7 +86,8 @@ const TableauDeBord = () => {
       sousTitre: t.tableauDeBord?.comptesEpargne || "Comptes d'épargne",
     },
     {
-      titre: t.tableauDeBord?.transactionsAujourdhui || "Transactions Aujourd'hui",
+      titre:
+        t.tableauDeBord?.transactionsAujourdhui || "Transactions Aujourd'hui",
       valeur: statistiquesGenerales.transactionsAujourdhui,
       icone: ArrowLeftRight,
       couleur: "bg-blue-500",
@@ -113,45 +115,49 @@ const TableauDeBord = () => {
       <div
         className="rounded-2xl p-6 text-white relative overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, #052e16 0%, #15803d 50%, #0c4a6e 100%)",
+          background:
+            "linear-gradient(135deg, #052e16 0%, #15803d 50%, #0c4a6e 100%)",
           boxShadow: "0 4px 20px rgba(22,163,74,0.25)",
         }}
       >
+        {/* Les cercles décoratifs restent inchangés */}
         <div
           className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-10"
-          style={{ background: "radial-gradient(circle, #4ade80, transparent)" }}
+          style={{
+            background: "radial-gradient(circle, #4ade80, transparent)",
+          }}
           aria-hidden="true"
         />
         <div
           className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full opacity-10"
-          style={{ background: "radial-gradient(circle, #0891b2, transparent)" }}
+          style={{
+            background: "radial-gradient(circle, #0891b2, transparent)",
+          }}
           aria-hidden="true"
         />
 
         <div className="relative flex items-center gap-4">
-          <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center
-            text-white font-bold text-xl shrink-0"
-            style={{
-              background: "rgba(255,255,255,0.15)",
-              border: "1px solid rgba(255,255,255,0.2)",
-            }}
-          >
-            {nomAdmin ? nomAdmin.charAt(0).toUpperCase() : "A"}
-          </div>
-
+          {/* LA DIV DE L'INITIALE A ÉTÉ SUPPRIMÉE ICI */}
           <div>
-            <p style={{ color: "rgba(255,255,255,0.65)" }} className="text-sm font-medium">
+            <p
+              style={{ color: "rgba(255,255,255,0.65)" }}
+              className="text-sm font-medium"
+            >
               {obtenirSalutation()} 👋
             </p>
             <h2 className="text-xl font-bold text-white">
               {t.commun?.administrateur || "Administrateur"}
             </h2>
-            <p style={{ color: "rgba(255,255,255,0.55)" }} className="text-sm mt-0.5">
-              {t.tableauDeBord?.description || "Bienvenue sur votre tableau de bord"}
+            <p
+              style={{ color: "rgba(255,255,255,0.55)" }}
+              className="text-sm mt-0.5"
+            >
+              {t.tableauDeBord?.description ||
+                "Bienvenue sur votre tableau de bord"}
             </p>
           </div>
 
+          {/* Le bloc date/heure à droite reste présent */}
           <div
             className="ml-auto hidden md:flex flex-col items-end"
             style={{ color: "rgba(255,255,255,0.6)" }}
@@ -175,7 +181,6 @@ const TableauDeBord = () => {
           </div>
         </div>
       </div>
-
       {/* Cartes statistiques */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {cartes.map((carte, index) => (
@@ -194,8 +199,13 @@ const TableauDeBord = () => {
       <div className="carte">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="titre-section">{t.tableauDeBord?.evolutionActivites || "Évolution des activités"}</h3>
-            <p className="sous-titre">{t.tableauDeBord?.evolutionDesc || "Crédits, épargnes et transactions sur 6 mois"}</p>
+            <h3 className="titre-section">
+              {t.tableauDeBord?.evolutionActivites || "Évolution des activités"}
+            </h3>
+            <p className="sous-titre">
+              {t.tableauDeBord?.evolutionDesc ||
+                "Crédits, épargnes et transactions sur 6 mois"}
+            </p>
           </div>
           <div
             className="px-3 py-1 rounded-lg text-xs font-semibold"
@@ -205,7 +215,10 @@ const TableauDeBord = () => {
           </div>
         </div>
         <ResponsiveContainer width="100%" height={280}>
-          <LineChart data={donneesGraphique} margin={{ top: 5, right: 10, bottom: 5, left: 0 }}>
+          <LineChart
+            data={donneesGraphique}
+            margin={{ top: 5, right: 10, bottom: 5, left: 0 }}
+          >
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis
               dataKey="mois"
@@ -218,21 +231,28 @@ const TableauDeBord = () => {
               axisLine={false}
               tickLine={false}
               tickFormatter={(v: number) =>
-                new Intl.NumberFormat("fr-FR", { notation: "compact" }).format(v)
+                new Intl.NumberFormat("fr-FR", { notation: "compact" }).format(
+                  v,
+                )
               }
             />
             <Tooltip
               formatter={(value: unknown) => {
                 let numericValue: number = 0;
-                if (typeof value === 'number') {
+                if (typeof value === "number") {
                   numericValue = value;
-                } else if (typeof value === 'string') {
+                } else if (typeof value === "string") {
                   numericValue = parseFloat(value) || 0;
                 } else if (Array.isArray(value) && value.length > 0) {
                   const firstValue = value[0];
-                  numericValue = typeof firstValue === 'number' ? firstValue : parseFloat(String(firstValue)) || 0;
+                  numericValue =
+                    typeof firstValue === "number"
+                      ? firstValue
+                      : parseFloat(String(firstValue)) || 0;
                 }
-                return new Intl.NumberFormat("fr-FR").format(numericValue) + " FCFA";
+                return (
+                  new Intl.NumberFormat("fr-FR").format(numericValue) + " FCFA"
+                );
               }}
               contentStyle={{
                 borderRadius: "12px",
@@ -279,8 +299,14 @@ const TableauDeBord = () => {
         <div className="carte">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="titre-section">{t.tableauDeBord?.dernieresTransactions || "Dernières Transactions"}</h3>
-              <p className="sous-titre">{t.tableauDeBord?.cinqDernieresOperations || "5 dernières opérations"}</p>
+              <h3 className="titre-section">
+                {t.tableauDeBord?.dernieresTransactions ||
+                  "Dernières Transactions"}
+              </h3>
+              <p className="sous-titre">
+                {t.tableauDeBord?.cinqDernieresOperations ||
+                  "5 dernières opérations"}
+              </p>
             </div>
           </div>
           <div className="space-y-1">
@@ -294,7 +320,9 @@ const TableauDeBord = () => {
                   <div
                     className="w-9 h-9 rounded-xl flex items-center justify-center
                     text-white font-bold text-xs shrink-0"
-                    style={{ background: "linear-gradient(135deg, #16a34a, #0891b2)" }}
+                    style={{
+                      background: "linear-gradient(135deg, #16a34a, #0891b2)",
+                    }}
                   >
                     {tx.utilisateur.charAt(0)}
                   </div>
@@ -322,8 +350,13 @@ const TableauDeBord = () => {
         <div className="carte">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="titre-section">{t.tableauDeBord?.creditsRecents || "Crédits Récents"}</h3>
-              <p className="sous-titre">{t.tableauDeBord?.cinqDerniersMicroCredits || "5 derniers microcrédits"}</p>
+              <h3 className="titre-section">
+                {t.tableauDeBord?.creditsRecents || "Crédits Récents"}
+              </h3>
+              <p className="sous-titre">
+                {t.tableauDeBord?.cinqDerniersMicroCredits ||
+                  "5 derniers microcrédits"}
+              </p>
             </div>
           </div>
           <div className="space-y-1">
@@ -337,7 +370,9 @@ const TableauDeBord = () => {
                   <div
                     className="w-9 h-9 rounded-xl flex items-center justify-center
                     text-white font-bold text-xs shrink-0"
-                    style={{ background: "linear-gradient(135deg, #F59E0B, #d97706)" }}
+                    style={{
+                      background: "linear-gradient(135deg, #F59E0B, #d97706)",
+                    }}
                   >
                     {c.utilisateur.charAt(0)}
                   </div>
@@ -346,7 +381,8 @@ const TableauDeBord = () => {
                       {c.utilisateur}
                     </p>
                     <p className="text-xs text-gray-400 truncate">
-                      {t.credits?.taux || "Taux"} : {c.taux}% • {t.credits?.echeance || "Échéance"} :{" "}
+                      {t.credits?.taux || "Taux"} : {c.taux}% •{" "}
+                      {t.credits?.echeance || "Échéance"} :{" "}
                       {c.dateEcheance ?? "N/A"}
                     </p>
                   </div>

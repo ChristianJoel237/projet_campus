@@ -22,7 +22,7 @@ const Connexion = () => {
   const [motDePasse, setMotDePasse] = useState<string>("");
   const [afficherMdp, setAfficherMdp] = useState<boolean>(false);
   const [erreurLocale, setErreurLocale] = useState<string>("");
-
+      
   const handleSoumission = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErreurLocale("");
@@ -37,8 +37,8 @@ const Connexion = () => {
       setErreurLocale(Object.values(erreurs)[0] as string); 
       return; 
     }
-    
-    const donnees = sanitiserAvantEnvoi("connexion", { email, motDePasse }) as ConnexionFormData;
+    const donnees = sanitiserAvantEnvoi("connexion", { email, motDePasse }) as unknown as ConnexionFormData;
+    //const donnees = sanitiserAvantEnvoi("connexion", { email, motDePasse }) as ConnexionFormData;
     await seConnecter(donnees.email, donnees.motDePasse);
   };
 
