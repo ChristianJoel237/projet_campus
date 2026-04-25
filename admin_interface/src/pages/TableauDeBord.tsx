@@ -6,7 +6,7 @@ import {
   TrendingUp,
   AlertTriangle,
   LucideIcon,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -16,19 +16,18 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from "recharts";
-import { useState, useEffect } from "react";
-import CarteStatistique from "../component/ui/CarteStatique";
-import Badge from "../component/ui/Badge";
+} from 'recharts';
+import { useState, useEffect } from 'react';
+import CarteStatistique from '../component/ui/CarteStatique';
+import Badge from '../component/ui/Badge';
 import {
   statistiquesGenerales,
   donneesGraphique,
   transactions,
   credits,
-} from "../donnees/donneesFictives";
-import { useAuth } from "../context/AuthContext";
-import { useLangue } from "../context/LangueContext";
-import { Transaction, Credit } from "../types/donnees.types";
+} from '../donnees/donneesFictives';
+import { useLangue } from '../context/LangueContext';
+import { Transaction, Credit } from '../types/donnees.types';
 
 interface Carte {
   titre: string;
@@ -39,7 +38,6 @@ interface Carte {
 }
 
 const TableauDeBord = () => {
-  const { nomAdmin } = useAuth();
   const { t, langue } = useLangue();
   const [maintenant, setMaintenant] = useState<Date>(new Date());
 
@@ -51,38 +49,38 @@ const TableauDeBord = () => {
   }, []);
 
   const formaterMontant = (montant: number): string =>
-    new Intl.NumberFormat("fr-FR").format(montant) + " FCFA";
+    new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
 
   const obtenirSalutation = (): string => {
     const heure = maintenant.getHours();
-    if (heure >= 5 && heure < 12) return t.commun?.bonjour || "Bonjour";
+    if (heure >= 5 && heure < 12) return t.commun?.bonjour || 'Bonjour';
     if (heure >= 12 && heure < 18)
-      return t.commun?.bonApresMidi || "Bon après-midi";
-    return t.commun?.bonsoir || "Bonsoir";
+      return t.commun?.bonApresMidi || 'Bon après-midi';
+    return t.commun?.bonsoir || 'Bonsoir';
   };
 
-  const locale = langue === "fr" ? "fr-FR" : "en-US";
+  const locale = langue === 'fr' ? 'fr-FR' : 'en-US';
 
   const cartes: Carte[] = [
     {
-      titre: t.tableauDeBord?.totalUtilisateurs || "Total Utilisateurs",
+      titre: t.tableauDeBord?.totalUtilisateurs || 'Total Utilisateurs',
       valeur: statistiquesGenerales.totalUtilisateurs,
       icone: Users,
-      couleur: "bg-primary-600",
-      sousTitre: t.tableauDeBord?.commercantsInscrits || "Commerçants inscrits",
+      couleur: 'bg-primary-600',
+      sousTitre: t.tableauDeBord?.commercantsInscrits || 'Commerçants inscrits',
     },
     {
-      titre: t.tableauDeBord?.creditsActifs || "Crédits Actifs",
+      titre: t.tableauDeBord?.creditsActifs || 'Crédits Actifs',
       valeur: statistiquesGenerales.creditsActifs,
       icone: CreditCard,
-      couleur: "bg-teal-600",
-      sousTitre: t.tableauDeBord?.pretsEnCours || "Prêts en cours",
+      couleur: 'bg-teal-600',
+      sousTitre: t.tableauDeBord?.pretsEnCours || 'Prêts en cours',
     },
     {
-      titre: t.tableauDeBord?.epargnesActives || "Épargnes Actives",
+      titre: t.tableauDeBord?.epargnesActives || 'Épargnes Actives',
       valeur: statistiquesGenerales.epargnesActives,
       icone: PiggyBank,
-      couleur: "bg-gold-500",
+      couleur: 'bg-gold-500',
       sousTitre: t.tableauDeBord?.comptesEpargne || "Comptes d'épargne",
     },
     {
@@ -90,22 +88,22 @@ const TableauDeBord = () => {
         t.tableauDeBord?.transactionsAujourdhui || "Transactions Aujourd'hui",
       valeur: statistiquesGenerales.transactionsAujourdhui,
       icone: ArrowLeftRight,
-      couleur: "bg-blue-500",
-      sousTitre: t.tableauDeBord?.canalsMobile || "Orange Money & MTN",
+      couleur: 'bg-blue-500',
+      sousTitre: t.tableauDeBord?.canalsMobile || 'Orange Money & MTN',
     },
     {
-      titre: t.tableauDeBord?.revenusTotal || "Revenus Total",
+      titre: t.tableauDeBord?.revenusTotal || 'Revenus Total',
       valeur: formaterMontant(statistiquesGenerales.revenusTotal),
       icone: TrendingUp,
-      couleur: "bg-primary-700",
-      sousTitre: t.tableauDeBord?.ceMois || "Ce mois-ci",
+      couleur: 'bg-primary-700',
+      sousTitre: t.tableauDeBord?.ceMois || 'Ce mois-ci',
     },
     {
-      titre: t.tableauDeBord?.tauxRemboursement || "Taux de Remboursement",
-      valeur: statistiquesGenerales.tauxRemboursement + " %",
+      titre: t.tableauDeBord?.tauxRemboursement || 'Taux de Remboursement',
+      valeur: statistiquesGenerales.tauxRemboursement + ' %',
       icone: AlertTriangle,
-      couleur: "bg-orange-500",
-      sousTitre: t.tableauDeBord?.sixDerniersMois || "Sur les 6 derniers mois",
+      couleur: 'bg-orange-500',
+      sousTitre: t.tableauDeBord?.sixDerniersMois || 'Sur les 6 derniers mois',
     },
   ];
 
@@ -116,22 +114,22 @@ const TableauDeBord = () => {
         className="rounded-2xl p-6 text-white relative overflow-hidden"
         style={{
           background:
-            "linear-gradient(135deg, #052e16 0%, #15803d 50%, #0c4a6e 100%)",
-          boxShadow: "0 4px 20px rgba(22,163,74,0.25)",
+            'linear-gradient(135deg, #052e16 0%, #15803d 50%, #0c4a6e 100%)',
+          boxShadow: '0 4px 20px rgba(22,163,74,0.25)',
         }}
       >
         {/* Les cercles décoratifs restent inchangés */}
         <div
           className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-10"
           style={{
-            background: "radial-gradient(circle, #4ade80, transparent)",
+            background: 'radial-gradient(circle, #4ade80, transparent)',
           }}
           aria-hidden="true"
         />
         <div
           className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full opacity-10"
           style={{
-            background: "radial-gradient(circle, #0891b2, transparent)",
+            background: 'radial-gradient(circle, #0891b2, transparent)',
           }}
           aria-hidden="true"
         />
@@ -140,42 +138,42 @@ const TableauDeBord = () => {
           {/* LA DIV DE L'INITIALE A ÉTÉ SUPPRIMÉE ICI */}
           <div>
             <p
-              style={{ color: "rgba(255,255,255,0.65)" }}
+              style={{ color: 'rgba(255,255,255,0.65)' }}
               className="text-sm font-medium"
             >
               {obtenirSalutation()} 👋
             </p>
             <h2 className="text-xl font-bold text-white">
-              {t.commun?.administrateur || "Administrateur"}
+              {t.commun?.administrateur || 'Administrateur'}
             </h2>
             <p
-              style={{ color: "rgba(255,255,255,0.55)" }}
+              style={{ color: 'rgba(255,255,255,0.55)' }}
               className="text-sm mt-0.5"
             >
               {t.tableauDeBord?.description ||
-                "Bienvenue sur votre tableau de bord"}
+                'Bienvenue sur votre tableau de bord'}
             </p>
           </div>
 
           {/* Le bloc date/heure à droite reste présent */}
           <div
             className="ml-auto hidden md:flex flex-col items-end"
-            style={{ color: "rgba(255,255,255,0.6)" }}
+            style={{ color: 'rgba(255,255,255,0.6)' }}
           >
             <p className="text-xs font-medium capitalize">
-              {maintenant.toLocaleDateString(locale, { weekday: "long" })}
+              {maintenant.toLocaleDateString(locale, { weekday: 'long' })}
             </p>
             <p className="text-lg font-bold text-white">
               {maintenant.toLocaleDateString(locale, {
-                day: "numeric",
-                month: "long",
+                day: 'numeric',
+                month: 'long',
               })}
             </p>
             <p className="text-xs font-medium mt-0.5">
               {maintenant.toLocaleTimeString(locale, {
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: langue !== "fr",
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: langue !== 'fr',
               })}
             </p>
           </div>
@@ -200,18 +198,18 @@ const TableauDeBord = () => {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="titre-section">
-              {t.tableauDeBord?.evolutionActivites || "Évolution des activités"}
+              {t.tableauDeBord?.evolutionActivites || 'Évolution des activités'}
             </h3>
             <p className="sous-titre">
               {t.tableauDeBord?.evolutionDesc ||
-                "Crédits, épargnes et transactions sur 6 mois"}
+                'Crédits, épargnes et transactions sur 6 mois'}
             </p>
           </div>
           <div
             className="px-3 py-1 rounded-lg text-xs font-semibold"
-            style={{ background: "rgba(22,163,74,0.1)", color: "#16a34a" }}
+            style={{ background: 'rgba(22,163,74,0.1)', color: '#16a34a' }}
           >
-            {t.tableauDeBord?.sixDerniersMois || "6 derniers mois"}
+            {t.tableauDeBord?.sixDerniersMois || '6 derniers mois'}
           </div>
         </div>
         <ResponsiveContainer width="100%" height={280}>
@@ -222,43 +220,43 @@ const TableauDeBord = () => {
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis
               dataKey="mois"
-              tick={{ fontSize: 12, fill: "#9ca3af" }}
+              tick={{ fontSize: 12, fill: '#9ca3af' }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontSize: 11, fill: "#9ca3af" }}
+              tick={{ fontSize: 11, fill: '#9ca3af' }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v: number) =>
-                new Intl.NumberFormat("fr-FR", { notation: "compact" }).format(
-                  v,
+                new Intl.NumberFormat('fr-FR', { notation: 'compact' }).format(
+                  v
                 )
               }
             />
             <Tooltip
               formatter={(value: unknown) => {
                 let numericValue: number = 0;
-                if (typeof value === "number") {
+                if (typeof value === 'number') {
                   numericValue = value;
-                } else if (typeof value === "string") {
+                } else if (typeof value === 'string') {
                   numericValue = parseFloat(value) || 0;
                 } else if (Array.isArray(value) && value.length > 0) {
                   const firstValue = value[0];
                   numericValue =
-                    typeof firstValue === "number"
+                    typeof firstValue === 'number'
                       ? firstValue
                       : parseFloat(String(firstValue)) || 0;
                 }
                 return (
-                  new Intl.NumberFormat("fr-FR").format(numericValue) + " FCFA"
+                  new Intl.NumberFormat('fr-FR').format(numericValue) + ' FCFA'
                 );
               }}
               contentStyle={{
-                borderRadius: "12px",
-                border: "1px solid #e5e7eb",
-                fontSize: "13px",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                borderRadius: '12px',
+                border: '1px solid #e5e7eb',
+                fontSize: '13px',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
               }}
             />
             <Legend iconType="circle" iconSize={8} />
@@ -267,27 +265,27 @@ const TableauDeBord = () => {
               dataKey="credits"
               stroke="#16a34a"
               strokeWidth={2.5}
-              dot={{ r: 4, fill: "#16a34a" }}
+              dot={{ r: 4, fill: '#16a34a' }}
               activeDot={{ r: 6 }}
-              name={t.navigation?.credits || "Crédits"}
+              name={t.navigation?.credits || 'Crédits'}
             />
             <Line
               type="monotone"
               dataKey="epargnes"
               stroke="#F59E0B"
               strokeWidth={2.5}
-              dot={{ r: 4, fill: "#F59E0B" }}
+              dot={{ r: 4, fill: '#F59E0B' }}
               activeDot={{ r: 6 }}
-              name={t.navigation?.epargnes || "Épargnes"}
+              name={t.navigation?.epargnes || 'Épargnes'}
             />
             <Line
               type="monotone"
               dataKey="transactions"
               stroke="#0891b2"
               strokeWidth={2.5}
-              dot={{ r: 4, fill: "#0891b2" }}
+              dot={{ r: 4, fill: '#0891b2' }}
               activeDot={{ r: 6 }}
-              name={t.navigation?.transactions || "Transactions"}
+              name={t.navigation?.transactions || 'Transactions'}
             />
           </LineChart>
         </ResponsiveContainer>
@@ -301,11 +299,11 @@ const TableauDeBord = () => {
             <div>
               <h3 className="titre-section">
                 {t.tableauDeBord?.dernieresTransactions ||
-                  "Dernières Transactions"}
+                  'Dernières Transactions'}
               </h3>
               <p className="sous-titre">
                 {t.tableauDeBord?.cinqDernieresOperations ||
-                  "5 dernières opérations"}
+                  '5 dernières opérations'}
               </p>
             </div>
           </div>
@@ -321,7 +319,7 @@ const TableauDeBord = () => {
                     className="w-9 h-9 rounded-xl flex items-center justify-center
                     text-white font-bold text-xs shrink-0"
                     style={{
-                      background: "linear-gradient(135deg, #16a34a, #0891b2)",
+                      background: 'linear-gradient(135deg, #16a34a, #0891b2)',
                     }}
                   >
                     {tx.utilisateur.charAt(0)}
@@ -337,7 +335,7 @@ const TableauDeBord = () => {
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
                   <span className="text-sm font-bold text-gray-800 dark:text-white">
-                    {new Intl.NumberFormat("fr-FR").format(tx.montant)} FCFA
+                    {new Intl.NumberFormat('fr-FR').format(tx.montant)} FCFA
                   </span>
                   <Badge statut={tx.statut} />
                 </div>
@@ -351,11 +349,11 @@ const TableauDeBord = () => {
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="titre-section">
-                {t.tableauDeBord?.creditsRecents || "Crédits Récents"}
+                {t.tableauDeBord?.creditsRecents || 'Crédits Récents'}
               </h3>
               <p className="sous-titre">
                 {t.tableauDeBord?.cinqDerniersMicroCredits ||
-                  "5 derniers microcrédits"}
+                  '5 derniers microcrédits'}
               </p>
             </div>
           </div>
@@ -371,7 +369,7 @@ const TableauDeBord = () => {
                     className="w-9 h-9 rounded-xl flex items-center justify-center
                     text-white font-bold text-xs shrink-0"
                     style={{
-                      background: "linear-gradient(135deg, #F59E0B, #d97706)",
+                      background: 'linear-gradient(135deg, #F59E0B, #d97706)',
                     }}
                   >
                     {c.utilisateur.charAt(0)}
@@ -381,15 +379,15 @@ const TableauDeBord = () => {
                       {c.utilisateur}
                     </p>
                     <p className="text-xs text-gray-400 truncate">
-                      {t.credits?.taux || "Taux"} : {c.taux}% •{" "}
-                      {t.credits?.echeance || "Échéance"} :{" "}
-                      {c.dateEcheance ?? "N/A"}
+                      {t.credits?.taux || 'Taux'} : {c.taux}% •{' '}
+                      {t.credits?.echeance || 'Échéance'} :{' '}
+                      {c.dateEcheance ?? 'N/A'}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 ml-2">
                   <span className="text-sm font-bold text-gray-800 dark:text-white">
-                    {new Intl.NumberFormat("fr-FR").format(c.montant)} FCFA
+                    {new Intl.NumberFormat('fr-FR').format(c.montant)} FCFA
                   </span>
                   <Badge statut={c.statut} />
                 </div>

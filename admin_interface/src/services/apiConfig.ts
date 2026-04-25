@@ -11,14 +11,13 @@ export interface ApiResponse<T = unknown> {
 }
 
 // URL de base de l'API
-const API_URL: string = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
-
+const API_URL: string = import.meta.env.VITE_API_URL;
 // Récupérer le token stocké
-const getToken = (): string | null => localStorage.getItem("token");
+const getToken = (): string | null => localStorage.getItem('token');
 
 // Headers communs
 const headers = (avecAuth: boolean = true): HeadersInit => ({
-  "Content-Type": "application/json",
+  'Content-Type': 'application/json',
   ...(avecAuth && getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
 });
 
@@ -40,12 +39,12 @@ const requete = async <T = unknown>(
 
   // Token expiré → déconnexion automatique
   if (response.status === 401) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("estConnecte");
-    localStorage.removeItem("nomAdmin");
-    localStorage.removeItem("emailAdmin");
-    window.location.href = "/connexion";
-    throw new Error("Session expirée");
+    localStorage.removeItem('token');
+    localStorage.removeItem('estConnecte');
+    localStorage.removeItem('nomAdmin');
+    localStorage.removeItem('emailAdmin');
+    window.location.href = '/connexion';
+    throw new Error('Session expirée');
   }
 
   if (!response.ok) {
@@ -64,7 +63,7 @@ export const api = {
    * @returns Promise avec les données typées
    */
   get: <T = unknown>(endpoint: string, avecAuth: boolean = true): Promise<T> =>
-    requete<T>("GET", endpoint, null, avecAuth),
+    requete<T>('GET', endpoint, null, avecAuth),
 
   /**
    * Requête POST
@@ -73,8 +72,11 @@ export const api = {
    * @param avecAuth - Si true, inclut le token d'authentification
    * @returns Promise avec les données typées
    */
-  post: <T = unknown>(endpoint: string, corps: unknown = null, avecAuth: boolean = true): Promise<T> =>
-    requete<T>("POST", endpoint, corps, avecAuth),
+  post: <T = unknown>(
+    endpoint: string,
+    corps: unknown = null,
+    avecAuth: boolean = true
+  ): Promise<T> => requete<T>('POST', endpoint, corps, avecAuth),
 
   /**
    * Requête PUT
@@ -83,8 +85,11 @@ export const api = {
    * @param avecAuth - Si true, inclut le token d'authentification
    * @returns Promise avec les données typées
    */
-  put: <T = unknown>(endpoint: string, corps: unknown = null, avecAuth: boolean = true): Promise<T> =>
-    requete<T>("PUT", endpoint, corps, avecAuth),
+  put: <T = unknown>(
+    endpoint: string,
+    corps: unknown = null,
+    avecAuth: boolean = true
+  ): Promise<T> => requete<T>('PUT', endpoint, corps, avecAuth),
 
   /**
    * Requête PATCH
@@ -93,8 +98,11 @@ export const api = {
    * @param avecAuth - Si true, inclut le token d'authentification
    * @returns Promise avec les données typées
    */
-  patch: <T = unknown>(endpoint: string, corps: unknown = null, avecAuth: boolean = true): Promise<T> =>
-    requete<T>("PATCH", endpoint, corps, avecAuth),
+  patch: <T = unknown>(
+    endpoint: string,
+    corps: unknown = null,
+    avecAuth: boolean = true
+  ): Promise<T> => requete<T>('PATCH', endpoint, corps, avecAuth),
 
   /**
    * Requête DELETE
@@ -102,8 +110,10 @@ export const api = {
    * @param avecAuth - Si true, inclut le token d'authentification
    * @returns Promise avec les données typées
    */
-  delete: <T = unknown>(endpoint: string, avecAuth: boolean = true): Promise<T> =>
-    requete<T>("DELETE", endpoint, null, avecAuth),
+  delete: <T = unknown>(
+    endpoint: string,
+    avecAuth: boolean = true
+  ): Promise<T> => requete<T>('DELETE', endpoint, null, avecAuth),
 };
 
 export default api;

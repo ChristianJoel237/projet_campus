@@ -1,5 +1,5 @@
 // src/services/agents.service.ts
-import { api, ApiResponse } from './api';
+import { api, ApiResponse } from './apiConfig';
 import type { Agent } from '../context/AgentsContext';
 
 export interface CreateAgentDTO {
