@@ -16,7 +16,7 @@ export const agentsService = {
      * Récupérer tous les agents de terrain
      */
     getAll: async (): Promise<Agent[]> => {
-        const response = await api.get<any>("/auth/get-by-role?role=ROLE_AGENT_DE_TERRAIN");
+        const response = await api.get<any>("/Admin/get-users-by-role?role=ROLE_AGENT_TERRAIN");
         const liste =
             response?.donnees ||
             response?.agents ||
@@ -40,7 +40,7 @@ export const agentsService = {
      * Créer un nouvel agent de terrain
      */
     create: async (data: CreateAgentDTO): Promise<Agent | null> => {
-        const response = await api.post<any>("/auth/create-agent-terrain", data);
+        const response = await api.post<any>("/Admin/create-agent", data);
         const agentCree =
             response?.donnees || response?.agent || response?.data || response?.user || response?.utilisateur || null;
 
@@ -71,6 +71,6 @@ export const agentsService = {
      * Suspendre un agent par son email
      */
     suspendre: async (email: string): Promise<void> => {
-        await api.patch<ApiResponse<void>>(`/auth/suspendUser?email=${encodeURIComponent(email)}`);
+        await api.patch<ApiResponse<void>>(`/Admin/change-status?email=${encodeURIComponent(email)}`);
     },
 };

@@ -67,7 +67,7 @@ export const utilisateurService = {
             ),
         });
 
-        const reponse = await api.get<any>(`/auth/get-by-role?${query.toString()}`);
+        const reponse = await api.get<any>(`/Admin/get-users-by-role?${query.toString()}`);
 
         // Extraction normalisée selon le format de réponse
         const utilisateurs = Array.isArray(reponse)
@@ -93,7 +93,7 @@ export const utilisateurService = {
     changerStatut: (id: string | number, statut: StatutUtilisateur): Promise<ReponseChangementStatut> =>
         api.patch<ReponseChangementStatut>(`/utilisateurs/${id}/statut`, { statut }),
 
-    supprimer: (id: string | number): Promise<ReponseMessage> => api.delete<ReponseMessage>(`/auth/deleteUser/${id}`),
+    supprimer: (id: string | number): Promise<ReponseMessage> => api.delete<ReponseMessage>(`/auth/delete-user/${id}`),
 };
 
 export default utilisateurService;
