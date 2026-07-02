@@ -1,7 +1,55 @@
 // src/donnees/donneesFictives.ts
 import { Utilisateur } from "../types/donnees.types";
+import { Agent } from "../context/AgentsContext";
 
-export const statistiquesGenerales = {
+export interface Statisiques {
+    totalUtilisateurs: number;
+    creditsActifs: number;
+    epargnesActives: number;
+    transactionsAujourdhui: number;
+    revenusTotal: number;
+    tauxRemboursement: number;
+}
+
+export interface CreditMock {
+    id: number;
+    utilisateur: string;
+    montant: number;
+    statut: "en_cours" | "rembourse" | "en_retard" | "en_attente";
+    dateDebut: string | null;
+    dateEcheance: string | null;
+    remboursement: number;
+    taux: number;
+    duree: number;
+}
+
+export interface EpargneMock {
+    id: number;
+    utilisateur: string;
+    solde: number;
+    typeEpargne: "quotidienne" | "hebdomadaire" | "mensuelle";
+    dernierDepot: string;
+    nombreDepots: number;
+}
+
+export interface TransactionMock {
+    id: number;
+    utilisateur: string;
+    type: "depot" | "transfert" | "remboursement" | "retrait";
+    montant: number;
+    canal: "Orange Money" | "MTN Mobile Money" | "Virement" | "Cash";
+    date: string;
+    statut: "reussi" | "echoue" | "en_attente";
+}
+
+export interface DonneesGraphiqueMock {
+    mois: string;
+    credits: number;
+    epargnes: number;
+    transactions: number;
+}
+
+export const statistiquesGenerales: Statisiques = {
     totalUtilisateurs: 1248,
     creditsActifs: 326,
     epargnesActives: 892,
@@ -10,7 +58,6 @@ export const statistiquesGenerales = {
     tauxRemboursement: 94,
 };
 
-// Tableau avec typage strict et inclusion des nouveaux statuts d'utilisateurs pour les tests
 export const utilisateurs: Utilisateur[] = [
     {
         id: 1,
@@ -29,7 +76,7 @@ export const utilisateurs: Utilisateur[] = [
         ville: "Douala",
         statut: "nouveau",
         credits: 0,
-        epargne: 0,
+        epargne: 120000, // Corrigé : Alignement avec le solde du tableau epargnes
         dateInscription: "2026-06-10",
     },
     {
@@ -51,16 +98,6 @@ export const utilisateurs: Utilisateur[] = [
         credits: 3,
         epargne: 200000,
         dateInscription: "2024-01-28",
-    },
-    {
-        id: 5,
-        nom: "Foko Sandrine",
-        telephone: "6XX-XXX-005",
-        ville: "Maroua",
-        statut: "suspendu",
-        credits: 1,
-        epargne: 8000,
-        dateInscription: "2024-04-05",
     },
     {
         id: 6,
@@ -94,10 +131,7 @@ export const utilisateurs: Utilisateur[] = [
     },
 ];
 
-export const credits = [
-    // ─────────────────────────────────────────────────────────
-    // CAS EXISTANTS — statuts variés (non en_attente)
-    // ─────────────────────────────────────────────────────────
+export const credits: CreditMock[] = [
     {
         id: 1,
         utilisateur: "Mballa Marie",
@@ -153,10 +187,6 @@ export const credits = [
         taux: 8,
         duree: 3,
     },
-
-    // ─────────────────────────────────────────────────────────
-    // CAS DE TEST IA — EN ATTENTE (Scénarios Credit Scoring)
-    // ─────────────────────────────────────────────────────────
     {
         id: 6,
         utilisateur: "Nkomo Grace",
@@ -167,7 +197,7 @@ export const credits = [
         remboursement: 0,
         taux: 3,
         duree: 6,
-    }, // Risque faible
+    },
     {
         id: 7,
         utilisateur: "Djomo Hervé",
@@ -178,7 +208,7 @@ export const credits = [
         remboursement: 0,
         taux: 4,
         duree: 12,
-    }, // Risque faible
+    },
     {
         id: 8,
         utilisateur: "Essomba Clarisse",
@@ -189,7 +219,7 @@ export const credits = [
         remboursement: 0,
         taux: 6,
         duree: 24,
-    }, // Risque moyen
+    },
     {
         id: 9,
         utilisateur: "Atangana Roméo",
@@ -200,7 +230,7 @@ export const credits = [
         remboursement: 0,
         taux: 8,
         duree: 18,
-    }, // Risque moyen
+    },
     {
         id: 10,
         utilisateur: "Mfou Bertrand",
@@ -211,7 +241,7 @@ export const credits = [
         remboursement: 0,
         taux: 12,
         duree: 36,
-    }, // Risque élevé
+    },
     {
         id: 11,
         utilisateur: "Bikele Sylvie",
@@ -222,7 +252,7 @@ export const credits = [
         remboursement: 0,
         taux: 10,
         duree: 48,
-    }, // Risque élevé
+    },
     {
         id: 12,
         utilisateur: "Owono Francine",
@@ -233,7 +263,7 @@ export const credits = [
         remboursement: 0,
         taux: 2,
         duree: 3,
-    }, // Limite min
+    },
     {
         id: 13,
         utilisateur: "Ndi Pascal",
@@ -244,7 +274,7 @@ export const credits = [
         remboursement: 0,
         taux: 15,
         duree: 12,
-    }, // Limite taux max
+    },
     {
         id: 14,
         utilisateur: "Zoa Henriette",
@@ -255,7 +285,7 @@ export const credits = [
         remboursement: 0,
         taux: 5,
         duree: 60,
-    }, // Limite durée max
+    },
     {
         id: 15,
         utilisateur: "Manga Cédric",
@@ -266,10 +296,10 @@ export const credits = [
         remboursement: 0,
         taux: 7,
         duree: 20,
-    }, // Zone grise
+    },
 ];
 
-export const epargnes = [
+export const epargnes: EpargneMock[] = [
     {
         id: 1,
         utilisateur: "Mballa Marie",
@@ -320,7 +350,7 @@ export const epargnes = [
     },
 ];
 
-export const transactions = [
+export const transactions: TransactionMock[] = [
     {
         id: 1,
         utilisateur: "Mballa Marie",
@@ -386,7 +416,7 @@ export const transactions = [
     },
 ];
 
-export const donneesGraphique = [
+export const donneesGraphique: DonneesGraphiqueMock[] = [
     { mois: "Août", credits: 850000, epargnes: 620000, transactions: 430000 },
     { mois: "Sep", credits: 920000, epargnes: 710000, transactions: 520000 },
     { mois: "Oct", credits: 1100000, epargnes: 830000, transactions: 610000 },
@@ -395,9 +425,7 @@ export const donneesGraphique = [
     { mois: "Jan", credits: 1480000, epargnes: 1250000, transactions: 980000 },
 ];
 
-// Ajout du mock des agents pour ton AgentsContext
-
-export const agents = [
+export const agents: Agent[] = [
     {
         id: "AGT-2026-001",
         nom: "Kamga",
@@ -408,6 +436,7 @@ export const agents = [
         statut: "actif",
         dossiers: 42,
         dateInscription: "2024-02-15",
+        email: "jp.kamga@microfinance.local",
     },
     {
         id: "AGT-2026-002",
@@ -416,9 +445,10 @@ export const agents = [
         telephone: "699-XX-XX-XX",
         ville: "Douala",
         login: "h.fotso",
-        statut: "en_conge",
+        statut: "suspendu", // Modifié pour être conforme au type strict 'actif' | 'suspendu' d'AgentsContext
         dossiers: 28,
         dateInscription: "2024-05-10",
+        email: "h.fotso@microfinance.local",
     },
     {
         id: "AGT-2026-003",
@@ -427,8 +457,9 @@ export const agents = [
         telephone: "655-XX-XX-XX",
         ville: "Yaoundé",
         login: "s.ndi",
-        statut: "inactif",
+        statut: "suspendu", // Modifié 'inactif' -> 'suspendu' pour respecter le type strict
         dossiers: 12,
         dateInscription: "2025-01-18",
+        email: "s.ndi@microfinance.local",
     },
 ];
