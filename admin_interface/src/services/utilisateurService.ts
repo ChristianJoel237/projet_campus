@@ -1,9 +1,7 @@
 import { api } from "./apiConfig";
+import { ApiResponse } from "./apiConfig";
 
-// ============================================
 // TYPES
-// ============================================
-
 export type StatutUtilisateur = "nouveau" | "actif" | "inactif" | "suspendu" | "bloque";
 
 export interface Utilisateur {
@@ -45,14 +43,10 @@ export interface ParamsUtilisateurs {
     recherche?: string;
 }
 
-// ============================================
-// SERVICE
-// ============================================
-
 export const utilisateurService = {
     /**
      * Liste les utilisateurs par rôle
-     * GET /auth/get-by-role
+     * GET /Admin/get-users-by-role?role=...
      */
     listerTous: async (
         role: string = "ROLE_UTILISATEUR",
@@ -69,7 +63,6 @@ export const utilisateurService = {
 
         const reponse = await api.get<any>(`/Admin/get-users-by-role?${query.toString()}`);
 
-        // Extraction normalisée selon le format de réponse
         const utilisateurs = Array.isArray(reponse)
             ? reponse
             : reponse?.utilisateurs || reponse?.donnees || reponse?.data || [];
@@ -90,9 +83,17 @@ export const utilisateurService = {
     modifier: (id: string | number, donnees: any): Promise<ReponseUtilisateur> =>
         api.put<ReponseUtilisateur>(`/utilisateurs/${id}`, donnees),
 
-    changerStatut: (id: string | number, statut: StatutUtilisateur): Promise<ReponseChangementStatut> =>
-        api.patch<ReponseChangementStatut>(`/utilisateurs/${id}/statut`, { statut }),
-
+    /**
+     * Change le statut d'un utilisateur (actif, suspendu, bloqué, etc.)
+     */
+    changerStatut: async (email: string, statut: string): Promise<void> => {
+        await api.patch(
+            `/Admin/change-status?email=${encodeURIComponent(email)}&status=${encodeURIComponent(statut.toUpperCase())}`,
+        );
+    },
+    /**
+     * Supprime un utilisateur
+     */
     supprimer: (id: string | number): Promise<ReponseMessage> => api.delete<ReponseMessage>(`/auth/delete-user/${id}`),
 };
 

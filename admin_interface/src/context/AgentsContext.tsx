@@ -4,6 +4,7 @@ import * as db from "../donnees/donneesFictives";
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 
+// 🔧 Ajout de "bloque" dans le type de statut
 export interface Agent {
     id: string;
     prenom: string;
@@ -11,7 +12,7 @@ export interface Agent {
     telephone: string;
     ville: string;
     email: string;
-    statut: "actif" | "suspendu" | "inactif" | "en_conge";
+    statut: "actif" | "suspendu" | "inactif" | "en_conge" | "bloque"; // <-- "bloque" ajouté
     dossiers?: number;
     login?: string;
     dateInscription?: string;
@@ -41,6 +42,7 @@ interface AgentsContextType {
     supprimerAgent: (email: string) => Promise<void>;
     suspendreAgent: (email: string) => Promise<void>;
     getAgentById: (id: string) => Agent | undefined;
+    changerStatutAgent: (email: string, nouveauStatut: "actif" | "suspendu" | "bloque") => Promise<void>;
 }
 
 const AgentsContext = createContext<AgentsContextType | undefined>(undefined);
@@ -51,18 +53,25 @@ export const useAgents = () => {
     return context;
 };
 
+// 🔧 Fonction de normalisation qui conserve tous les statuts valides
+const statutsValides = ["actif", "suspendu", "inactif", "en_conge", "bloque"];
+
+function normaliserStatuts(liste: any[]): Agent[] {
+    return (liste || []).map((a: any) => {
+        const statutRecu = (a?.statut ?? "").toLowerCase();
+        const statutNormalise = statutsValides.includes(statutRecu) ? statutRecu : "actif";
+        return {
+            ...a,
+            id: String(a.id ?? a.userId ?? a.idUser ?? a.agentId ?? ""),
+            statut: statutNormalise as Agent["statut"],
+        };
+    });
+}
+
 export const AgentsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [agents, setAgents] = useState<Agent[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
-    const normaliserStatuts = (liste: any[]): Agent[] => {
-        return (liste || []).map((a: any) => ({
-            ...a,
-            id: String(a.id ?? a.userId ?? a.idUser ?? a.agentId ?? ""),
-            statut: a?.statut === "suspendu" ? "suspendu" : a?.statut || "actif",
-        }));
-    };
 
     const fetchAgents = useCallback(async () => {
         setLoading(true);
@@ -110,7 +119,6 @@ export const AgentsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                         statut: nouvelAgent.statut || "actif",
                         dateInscription: new Date().toISOString().split("T")[0],
                     };
-
                     setAgents((prev) => [agentSimule, ...prev]);
                     setLoading(false);
                     resolve();
@@ -179,7 +187,9 @@ export const AgentsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             return;
         }
         try {
-            await agentsService.delete(email);
+            const agentCible = agents.find((a) => a.email === email);
+            if (!agentCible) throw new Error("Agent introuvable");
+            await agentsService.delete(agentCible.id);
             setAgents((prev) => prev.filter((a) => a.email !== email));
         } catch (err) {
             console.error("Erreur suppression agent", err);
@@ -199,11 +209,31 @@ export const AgentsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
             return;
         }
         try {
-            await agentsService.suspendre(email);
+            await agentsService.changerStatutAgent(email, "suspendu");
             setAgents((prev) => prev.map((a) => (a.email === email ? { ...a, statut: "suspendu" } : a)));
         } catch (err) {
             console.error("Erreur suspension agent", err);
             setError("Erreur lors de la suspension de l'agent");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const changerStatutAgent = async (email: string, nouveauStatut: "actif" | "suspendu" | "bloque") => {
+        setLoading(true);
+        setError(null);
+        if (USE_MOCK) {
+            setAgents((prev) => prev.map((a) => (a.email === email ? { ...a, statut: nouveauStatut } : a)));
+            setLoading(false);
+            return;
+        }
+        try {
+            await agentsService.changerStatutAgent(email, nouveauStatut);
+            setAgents((prev) => prev.map((a) => (a.email === email ? { ...a, statut: nouveauStatut } : a)));
+        } catch (err) {
+            console.error("Erreur changement de statut agent", err);
+            setError("Erreur lors du changement de statut de l'agent");
             throw err;
         } finally {
             setLoading(false);
@@ -228,6 +258,7 @@ export const AgentsProvider: React.FC<{ children: ReactNode }> = ({ children }) 
                 supprimerAgent,
                 suspendreAgent,
                 getAgentById,
+                changerStatutAgent,
             }}
         >
             {children}

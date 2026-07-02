@@ -1,6 +1,24 @@
-// pages/Utilisateurs.tsx
 import { useState, useEffect } from "react";
-import { Search, Filter, Eye, Lock, Unlock, Users, X, Phone, MapPin, PiggyBank, Calendar } from "lucide-react";
+import {
+    Search,
+    Filter,
+    Eye,
+    Ban,
+    Trash2,
+    Users,
+    UserPlus,
+    UserCheck,
+    UserX,
+    UserMinus,
+    ShieldOff,
+    X,
+    Phone,
+    MapPin,
+    PiggyBank,
+    Calendar,
+    CheckCircle,
+    AlertCircle,
+} from "lucide-react";
 import Badge from "../component/ui/Badge";
 import { useUtilisateurs } from "../hooks/useUtilisateurs";
 import { useLangue } from "../context/LangueContext";
@@ -8,7 +26,115 @@ import { useTheme } from "../context/ThemeContext";
 import { Utilisateur, StatutUtilisateur } from "../types/donnees.types";
 import { utilisateurService } from "../services/utilisateurService";
 
-// ─── Modale profil utilisateur ───
+// Types d'actions
+type ActionUtilisateur = "activer" | "desactiver" | "bloquer" | "supprimer";
+
+// Modale de confirmation générique
+interface ModaleConfirmationProps {
+    action: ActionUtilisateur;
+    utilisateur: Utilisateur;
+    onConfirmer: () => void;
+    onAnnuler: () => void;
+    t: any;
+}
+
+const iconesAction: Record<ActionUtilisateur, React.ElementType> = {
+    activer: UserCheck,
+    desactiver: UserX,
+    bloquer: ShieldOff,
+    supprimer: Trash2,
+};
+
+const couleursAction: Record<ActionUtilisateur, { bg: string; text: string; button: string }> = {
+    activer: {
+        bg: "bg-green-100 dark:bg-green-900/30",
+        text: "text-green-600 dark:text-green-400",
+        button: "linear-gradient(135deg, #16a34a, #0891b2)",
+    },
+    desactiver: {
+        bg: "bg-amber-100 dark:bg-amber-900/30",
+        text: "text-amber-600 dark:text-amber-400",
+        button: "#f59e0b",
+    },
+    bloquer: {
+        bg: "bg-red-100 dark:bg-red-900/30",
+        text: "text-red-600 dark:text-red-400",
+        button: "#ef4444",
+    },
+    supprimer: {
+        bg: "bg-red-100 dark:bg-red-900/30",
+        text: "text-red-600 dark:text-red-400",
+        button: "#ef4444",
+    },
+};
+
+const ModaleConfirmation = ({ action, utilisateur, onConfirmer, onAnnuler, t }: ModaleConfirmationProps) => {
+    const { theme } = useTheme();
+    const ut = t.utilisateurs ?? {};
+
+    const Icone = iconesAction[action];
+    const couleurs = couleursAction[action];
+
+    const messages: Record<ActionUtilisateur, string> = {
+        activer: ut.confirmerActiver || "Activer l'utilisateur ?",
+        desactiver: ut.confirmerDesactiver || "Désactiver l'utilisateur ?",
+        bloquer: ut.confirmerBloquer || "Bloquer l'utilisateur ?",
+        supprimer: ut.confirmerSupprimer || "Supprimer l'utilisateur ?",
+    };
+
+    const sousTitres: Record<ActionUtilisateur, string> = {
+        activer: ut.confirmationActiver || "L'utilisateur pourra se connecter et utiliser les services.",
+        desactiver: ut.confirmationDesactiver || "L'utilisateur ne pourra plus se connecter.",
+        bloquer: ut.confirmationBloquer || "L'utilisateur sera bloqué définitivement.",
+        supprimer: ut.confirmationSupprimer || "Cette action est irréversible.",
+    };
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+            onClick={onAnnuler}
+        >
+            <div
+                className="w-full max-w-sm rounded-2xl p-5 space-y-4"
+                style={{
+                    background: theme === "dark" ? "#111827" : "#ffffff",
+                    boxShadow: "0 24px 64px rgba(0,0,0,0.2)",
+                    border: theme === "dark" ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(22,163,74,0.15)",
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto ${couleurs.bg}`}>
+                    <Icone size={22} className={couleurs.text} />
+                </div>
+
+                <div className="text-center space-y-1">
+                    <p className="text-base font-bold text-gray-900 dark:text-white">{messages[action]}</p>
+                    <p className="text-sm font-semibold text-green-600 dark:text-green-400">{utilisateur.nom}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{sousTitres[action]}</p>
+                </div>
+
+                <div className="flex gap-2 pt-1">
+                    <button
+                        onClick={onAnnuler}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                    >
+                        {t.commun?.annuler || "Annuler"}
+                    </button>
+                    <button
+                        onClick={onConfirmer}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white transition-all"
+                        style={{ background: couleurs.button }}
+                    >
+                        {t.commun?.confirmer || "Confirmer"}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Modale profil utilisateur (inchangée)
 interface ModaleUtilisateurProps {
     utilisateur: Utilisateur | null;
     onFermer: () => void;
@@ -162,7 +288,7 @@ const ModaleUtilisateur = ({ utilisateur, onFermer, t }: ModaleUtilisateurProps)
     );
 };
 
-// ─── Page principale ───
+// Page principale
 const Utilisateurs = () => {
     const { t } = useLangue();
     const { data: utilisateursServeur } = useUtilisateurs();
@@ -170,7 +296,13 @@ const Utilisateurs = () => {
     const [filtreStatut, setFiltreStatut] = useState<string>("tous");
     const [listeUtilisateurs, setListeUtilisateurs] = useState<Utilisateur[]>([]);
     const [utilisateurSelectionne, setUtilisateurSelectionne] = useState<Utilisateur | null>(null);
+    const [confirmation, setConfirmation] = useState<{
+        action: ActionUtilisateur;
+        utilisateur: Utilisateur;
+    } | null>(null);
+    const [messageSucces, setMessageSucces] = useState<string | null>(null);
 
+    // Normalisation des statuts en minuscules
     useEffect(() => {
         if (utilisateursServeur) {
             const utilisateursSecurises: Utilisateur[] = utilisateursServeur.map((u) => ({
@@ -178,15 +310,16 @@ const Utilisateurs = () => {
                 nom: u.nom ?? "Nom inconnu",
                 telephone: u.telephone ?? "",
                 ville: u.ville ?? "",
-                statut: u.statut ?? "nouveau",
+                statut: (u.statut ?? "nouveau").toLowerCase() as StatutUtilisateur,
                 epargne: u.epargne ?? 0,
                 dateInscription: u.dateInscription ?? "",
-                credits: u.credits ?? 0, // Résout l'erreur de propriété manquante
+                credits: u.credits ?? 0,
             }));
             setListeUtilisateurs(utilisateursSecurises);
         }
     }, [utilisateursServeur]);
 
+    // Filtrage
     const utilisateursFiltres = listeUtilisateurs.filter((u) => {
         const correspondRecherche =
             u.nom.toLowerCase().includes(recherche.toLowerCase()) ||
@@ -196,23 +329,50 @@ const Utilisateurs = () => {
         return correspondRecherche && correspondStatut;
     });
 
-    const changerStatut = async (id: string | number) => {
-        const utilisateur = listeUtilisateurs.find((u) => u.id === id);
-        if (!utilisateur) return;
-
-        const prochainStatut: StatutUtilisateur = utilisateur.statut === "actif" ? "suspendu" : "actif";
-
-        setListeUtilisateurs((prev) => prev.map((u) => (u.id === id ? { ...u, statut: prochainStatut } : u)));
-
+    // Exécution de l'action confirmée
+    const executerAction = async () => {
+        if (!confirmation) return;
+        const { action, utilisateur } = confirmation;
         try {
-            // Résout l'erreur d'assignation string | number
-            await utilisateurService.changerStatut(id.toString(), prochainStatut);
+            switch (action) {
+                case "activer":
+                    await utilisateurService.changerStatut(utilisateur.id.toString(), "actif");
+                    setListeUtilisateurs((prev) =>
+                        prev.map((u) => (u.id === utilisateur.id ? { ...u, statut: "actif" } : u)),
+                    );
+                    setMessageSucces("✅ Utilisateur activé avec succès.");
+                    break;
+                case "desactiver":
+                    await utilisateurService.changerStatut(utilisateur.id.toString(), "suspendu");
+                    setListeUtilisateurs((prev) =>
+                        prev.map((u) => (u.id === utilisateur.id ? { ...u, statut: "suspendu" } : u)),
+                    );
+                    setMessageSucces("✅ Utilisateur désactivé avec succès.");
+                    break;
+                case "bloquer":
+                    await utilisateurService.changerStatut(utilisateur.id.toString(), "bloque");
+                    setListeUtilisateurs((prev) =>
+                        prev.map((u) => (u.id === utilisateur.id ? { ...u, statut: "bloque" } : u)),
+                    );
+                    setMessageSucces("✅ Utilisateur bloqué avec succès.");
+                    break;
+                case "supprimer":
+                    await utilisateurService.supprimer(utilisateur.id.toString());
+                    setListeUtilisateurs((prev) => prev.filter((u) => u.id !== utilisateur.id));
+                    setMessageSucces("✅ Utilisateur supprimé avec succès.");
+                    break;
+            }
+            setTimeout(() => setMessageSucces(null), 3000);
         } catch (error) {
-            console.error("Erreur lors de la modification du statut:", error);
-            setListeUtilisateurs((prev) => prev.map((u) => (u.id === id ? { ...u, statut: utilisateur.statut } : u)));
+            console.error(`Erreur ${action} :`, error);
+            setMessageSucces("❌ Erreur lors de l'action.");
+            setTimeout(() => setMessageSucces(null), 3000);
+        } finally {
+            setConfirmation(null);
         }
     };
 
+    // Totaux dynamiques
     const totalNouveaux = listeUtilisateurs.filter((u) => u.statut === "nouveau").length;
     const totalActifs = listeUtilisateurs.filter((u) => u.statut === "actif").length;
     const totalInactifs = listeUtilisateurs.filter((u) => u.statut === "inactif").length;
@@ -226,6 +386,7 @@ const Utilisateurs = () => {
             valeur: listeUtilisateurs.length,
             couleur: "#16a34a",
             fond: "rgba(22,163,74,0.1)",
+            icone: Users,
         },
         {
             id: "nouveau",
@@ -233,6 +394,7 @@ const Utilisateurs = () => {
             valeur: totalNouveaux,
             couleur: "#0891b2",
             fond: "rgba(8,145,178,0.1)",
+            icone: UserPlus,
         },
         {
             id: "actifs",
@@ -240,6 +402,7 @@ const Utilisateurs = () => {
             valeur: totalActifs,
             couleur: "#16a34a",
             fond: "rgba(22,163,74,0.1)",
+            icone: UserCheck,
         },
         {
             id: "inactifs",
@@ -247,6 +410,7 @@ const Utilisateurs = () => {
             valeur: totalInactifs,
             couleur: "#6b7280",
             fond: "rgba(107,114,128,0.1)",
+            icone: UserMinus,
         },
         {
             id: "suspendus",
@@ -254,6 +418,7 @@ const Utilisateurs = () => {
             valeur: totalSuspendus,
             couleur: "#f59e0b",
             fond: "rgba(245,158,11,0.1)",
+            icone: UserX,
         },
         {
             id: "bloques",
@@ -261,16 +426,8 @@ const Utilisateurs = () => {
             valeur: totalBloques,
             couleur: "#ef4444",
             fond: "rgba(239,68,68,0.1)",
+            icone: ShieldOff,
         },
-    ];
-
-    const colonnes = [
-        { id: "nom", label: t.utilisateurs?.nom || "Nom" },
-        { id: "telephone", label: t.utilisateurs?.telephone || "Téléphone" },
-        { id: "ville", label: t.utilisateurs?.ville || "Ville" },
-        { id: "epargne", label: t.utilisateurs?.epargne || "Épargne" },
-        { id: "statut", label: t.utilisateurs?.statut || "Statut" },
-        { id: "actions", label: t.utilisateurs?.actions || "Actions" },
     ];
 
     return (
@@ -283,6 +440,38 @@ const Utilisateurs = () => {
                 />
             )}
 
+            {confirmation && (
+                <ModaleConfirmation
+                    action={confirmation.action}
+                    utilisateur={confirmation.utilisateur}
+                    onConfirmer={executerAction}
+                    onAnnuler={() => setConfirmation(null)}
+                    t={t}
+                />
+            )}
+
+            {messageSucces && (
+                <div
+                    className="px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-3"
+                    style={{
+                        background: messageSucces.includes("❌") ? "rgba(239,68,68,0.08)" : "rgba(22,163,74,0.08)",
+                        border: messageSucces.includes("❌")
+                            ? "1px solid rgba(239,68,68,0.25)"
+                            : "1px solid rgba(22,163,74,0.25)",
+                        color: messageSucces.includes("❌") ? "#ef4444" : "#16a34a",
+                    }}
+                >
+                    {messageSucces.includes("❌") ? <AlertCircle size={16} /> : <CheckCircle size={16} />}
+                    <span>{messageSucces}</span>
+                    <button
+                        onClick={() => setMessageSucces(null)}
+                        className="ml-auto text-gray-400 hover:text-gray-600"
+                    >
+                        <X size={14} />
+                    </button>
+                </div>
+            )}
+
             <div>
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
                     {t.utilisateurs?.titre || "Utilisateurs"}
@@ -290,8 +479,7 @@ const Utilisateurs = () => {
                 <p className="sous-titre">{t.utilisateurs?.description || "Gestion des utilisateurs"}</p>
             </div>
 
-            {/* Cartes Résumé */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 {cartesResume.map((item) => (
                     <div
                         key={item.id}
@@ -301,7 +489,7 @@ const Utilisateurs = () => {
                             className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
                             style={{ background: item.fond }}
                         >
-                            <Users size={18} style={{ color: item.couleur }} aria-hidden="true" />
+                            <item.icone size={18} style={{ color: item.couleur }} />
                         </div>
                         <div className="min-w-0">
                             <p className="text-xs text-gray-500 dark:text-gray-400 font-medium truncate">
@@ -313,24 +501,21 @@ const Utilisateurs = () => {
                 ))}
             </div>
 
-            {/* Recherche et Filtres */}
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex flex-1 items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5">
-                    <Search size={16} className="text-gray-400 shrink-0" aria-hidden="true" />
+                    <Search size={16} className="text-gray-400 shrink-0" />
                     <input
                         type="search"
                         placeholder={t.utilisateurs?.recherche || "Rechercher..."}
-                        aria-label={t.utilisateurs?.recherche || "Rechercher"}
                         value={recherche}
                         onChange={(e) => setRecherche(e.target.value)}
                         className="bg-transparent text-sm text-gray-700 dark:text-gray-200 outline-none w-full placeholder-gray-400"
                     />
                 </div>
                 <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5">
-                    <Filter size={16} className="text-gray-400 shrink-0" aria-hidden="true" />
+                    <Filter size={16} className="text-gray-400 shrink-0" />
                     <select
                         value={filtreStatut}
-                        aria-label={t.commun?.filtrer || "Filtrer"}
                         onChange={(e) => setFiltreStatut(e.target.value)}
                         className="bg-transparent text-sm text-gray-700 dark:text-gray-200 outline-none"
                     >
@@ -344,17 +529,17 @@ const Utilisateurs = () => {
                 </div>
             </div>
 
-            {/* Tableau */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm" role="table" aria-label={t.utilisateurs?.titre || "Utilisateurs"}>
+                    <table className="w-full text-sm">
                         <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
                             <tr>
-                                {colonnes.map((col) => (
-                                    <th key={col.id} className="entete-tableau">
-                                        {col.label}
-                                    </th>
-                                ))}
+                                <th className="entete-tableau">{t.utilisateurs?.nom || "Nom"}</th>
+                                <th className="entete-tableau">{t.utilisateurs?.telephone || "Téléphone"}</th>
+                                <th className="entete-tableau">{t.utilisateurs?.ville || "Ville"}</th>
+                                <th className="entete-tableau">{t.utilisateurs?.epargne || "Épargne"}</th>
+                                <th className="entete-tableau">{t.utilisateurs?.statut || "Statut"}</th>
+                                <th className="entete-tableau">{t.utilisateurs?.actions || "Actions"}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
@@ -386,40 +571,69 @@ const Utilisateurs = () => {
                                             <Badge statut={u.statut} />
                                         </td>
                                         <td className="cellule-tableau">
-                                            <div className="flex items-center gap-1">
+                                            <div className="flex items-center gap-1 flex-wrap">
                                                 <button
                                                     onClick={() => setUtilisateurSelectionne(u)}
-                                                    aria-label={`${t.utilisateurs?.voir || "Voir"} ${u.nom}`}
-                                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950/30"
+                                                    className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950/30"
                                                 >
-                                                    <Eye size={14} aria-hidden="true" />
-                                                    <span>{t.utilisateurs?.voir || "Voir"}</span>
+                                                    <Eye size={14} />
+                                                    <span className="hidden sm:inline">
+                                                        {t.utilisateurs?.voir || "Voir"}
+                                                    </span>
                                                 </button>
 
+                                                {u.statut !== "actif" && (
+                                                    <button
+                                                        onClick={() =>
+                                                            setConfirmation({ action: "activer", utilisateur: u })
+                                                        }
+                                                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30"
+                                                    >
+                                                        <UserCheck size={14} />
+                                                        <span className="hidden sm:inline">
+                                                            {t.utilisateurs?.activer || "Activer"}
+                                                        </span>
+                                                    </button>
+                                                )}
+
+                                                {u.statut === "actif" && (
+                                                    <button
+                                                        onClick={() =>
+                                                            setConfirmation({ action: "desactiver", utilisateur: u })
+                                                        }
+                                                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30"
+                                                    >
+                                                        <UserX size={14} />
+                                                        <span className="hidden sm:inline">
+                                                            {t.utilisateurs?.desactiver || "Désactiver"}
+                                                        </span>
+                                                    </button>
+                                                )}
+
+                                                {u.statut !== "bloque" && (
+                                                    <button
+                                                        onClick={() =>
+                                                            setConfirmation({ action: "bloquer", utilisateur: u })
+                                                        }
+                                                        className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
+                                                    >
+                                                        <Ban size={14} />
+                                                        <span className="hidden sm:inline">
+                                                            {t.utilisateurs?.bloquer || "Bloquer"}
+                                                        </span>
+                                                    </button>
+                                                )}
+
                                                 <button
-                                                    onClick={() => changerStatut(u.id)}
-                                                    aria-label={
-                                                        u.statut === "actif"
-                                                            ? `${t.utilisateurs?.suspendre || "Suspendre"} ${u.nom}`
-                                                            : `${t.utilisateurs?.activer || "Activer"} ${u.nom}`
+                                                    onClick={() =>
+                                                        setConfirmation({ action: "supprimer", utilisateur: u })
                                                     }
-                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                                                        u.statut === "actif"
-                                                            ? "text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
-                                                            : "text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30"
-                                                    }`}
+                                                    className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
                                                 >
-                                                    {u.statut === "actif" ? (
-                                                        <>
-                                                            <Lock size={14} aria-hidden="true" />
-                                                            <span>{t.utilisateurs?.suspendre || "Suspendre"}</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Unlock size={14} aria-hidden="true" />
-                                                            <span>{t.utilisateurs?.activer || "Activer"}</span>
-                                                        </>
-                                                    )}
+                                                    <Trash2 size={14} />
+                                                    <span className="hidden sm:inline">
+                                                        {t.utilisateurs?.supprimer || "Supprimer"}
+                                                    </span>
                                                 </button>
                                             </div>
                                         </td>
@@ -432,7 +646,7 @@ const Utilisateurs = () => {
                                             className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3"
                                             style={{ background: "rgba(22,163,74,0.1)" }}
                                         >
-                                            <Users size={22} style={{ color: "#16a34a" }} aria-hidden="true" />
+                                            <Users size={22} style={{ color: "#16a34a" }} />
                                         </div>
                                         <p className="text-sm text-gray-500 dark:text-gray-400">
                                             {t.utilisateurs?.aucunUtilisateur || "Aucun utilisateur trouvé."}
