@@ -5,49 +5,47 @@ export interface ReponseConnexion {
 }
 
 export const authService = {
+    /**
+     * Connecte l'utilisateur avec email et mot de passe.
+     * Stocke le token d'accès et le refresh token (si fourni) dans sessionStorage.
+     */
     seConnecter: async (email: string, password: string): Promise<ReponseConnexion> => {
-        // 1. Debug : Vérification explicite de ce qui est transmis avant l'appel API
-        console.log("DEBUG - Envoi vers API :", { email, password });
+        // Appel à l'API de connexion (sans authentification préalable)
+        const reponse = await api.post<any>("/auth/login", { email, password }, false);
 
-        // 2. Appel de l'API
-        // Assure-toi que ton api.post gère bien le format JSON
-        const reponse = await api.post<any>(
-            "/auth/login",
-            {
-                email,
-                password,
-            },
-            false,
-        );
-
-        // 3. Debug : Visualiser la réponse brute pour identifier la structure réelle
-        console.log("DEBUG - Réponse brute du serveur :", reponse);
-
-        // 4. Extraction sécurisée
-        // Vérifie bien dans l'onglet Network de ton F12 la structure réelle renvoyée
+        // Extraction sécurisée du token (plusieurs formes possibles)
         const token = reponse?.token || reponse?.access_token || reponse?.accessToken || reponse?.data?.token || null;
+        const refreshToken = reponse?.refreshToken || reponse?.refresh_token || null;
 
         if (!token) {
-            throw new Error("Authentification échouée : Le serveur n'a pas retourné de jeton (token).");
+            throw new Error("Authentification échouée : le serveur n'a pas retourné de jeton d'accès.");
         }
 
-        // 5. Stockage persistant
-        localStorage.setItem("token", token);
-        localStorage.setItem("estConnecte", "true");
+        // Stockage dans sessionStorage (détruit automatiquement à la fermeture de l'onglet/navigateur)
+        sessionStorage.setItem("token", token);
+        if (refreshToken) {
+            sessionStorage.setItem("refreshToken", refreshToken);
+        }
+        sessionStorage.setItem("estConnecte", "true");
 
         return { token };
     },
 
+    /**
+     * Déconnecte l'utilisateur (appel API + nettoyage local).
+     * Redirige vers la page de connexion.
+     */
     deconnexion: async (): Promise<void> => {
         try {
             await api.post("/auth/logout", null, true);
         } catch (erreur) {
             console.warn("Déconnexion serveur impossible, nettoyage local forcé :", erreur);
         } finally {
-            localStorage.removeItem("token");
-            localStorage.removeItem("estConnecte");
-            localStorage.removeItem("nomAdmin");
-            localStorage.removeItem("emailAdmin");
+            sessionStorage.removeItem("token");
+            sessionStorage.removeItem("refreshToken");
+            sessionStorage.removeItem("estConnecte");
+            sessionStorage.removeItem("nomAdmin");
+            sessionStorage.removeItem("emailAdmin");
             window.location.href = "/connexion";
         }
     },

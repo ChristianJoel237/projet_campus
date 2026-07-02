@@ -302,7 +302,7 @@ const Utilisateurs = () => {
     } | null>(null);
     const [messageSucces, setMessageSucces] = useState<string | null>(null);
 
-    // Normalisation des statuts en minuscules
+    // ✅ Normalisation des données (ajout de l'email)
     useEffect(() => {
         if (utilisateursServeur) {
             const utilisateursSecurises: Utilisateur[] = utilisateursServeur.map((u) => ({
@@ -314,6 +314,7 @@ const Utilisateurs = () => {
                 epargne: u.epargne ?? 0,
                 dateInscription: u.dateInscription ?? "",
                 credits: u.credits ?? 0,
+                email: u.email ?? "",
             }));
             setListeUtilisateurs(utilisateursSecurises);
         }
@@ -334,23 +335,29 @@ const Utilisateurs = () => {
         if (!confirmation) return;
         const { action, utilisateur } = confirmation;
         try {
+            if (!utilisateur.email) {
+                setMessageSucces("❌ Cet utilisateur n'a pas d'email.");
+                setConfirmation(null);
+                return;
+            }
+
             switch (action) {
                 case "activer":
-                    await utilisateurService.changerStatut(utilisateur.id.toString(), "actif");
+                    await utilisateurService.changerStatut(utilisateur.email, "actif");
                     setListeUtilisateurs((prev) =>
                         prev.map((u) => (u.id === utilisateur.id ? { ...u, statut: "actif" } : u)),
                     );
                     setMessageSucces("✅ Utilisateur activé avec succès.");
                     break;
                 case "desactiver":
-                    await utilisateurService.changerStatut(utilisateur.id.toString(), "suspendu");
+                    await utilisateurService.changerStatut(utilisateur.email, "suspendu");
                     setListeUtilisateurs((prev) =>
                         prev.map((u) => (u.id === utilisateur.id ? { ...u, statut: "suspendu" } : u)),
                     );
                     setMessageSucces("✅ Utilisateur désactivé avec succès.");
                     break;
                 case "bloquer":
-                    await utilisateurService.changerStatut(utilisateur.id.toString(), "bloque");
+                    await utilisateurService.changerStatut(utilisateur.email, "bloque");
                     setListeUtilisateurs((prev) =>
                         prev.map((u) => (u.id === utilisateur.id ? { ...u, statut: "bloque" } : u)),
                     );
@@ -365,7 +372,7 @@ const Utilisateurs = () => {
             setTimeout(() => setMessageSucces(null), 3000);
         } catch (error) {
             console.error(`Erreur ${action} :`, error);
-            setMessageSucces("❌ Erreur lors de l'action.");
+            setMessageSucces(`❌ Erreur lors de l'action.`);
             setTimeout(() => setMessageSucces(null), 3000);
         } finally {
             setConfirmation(null);

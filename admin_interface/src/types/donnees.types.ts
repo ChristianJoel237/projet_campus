@@ -41,6 +41,7 @@ export interface Utilisateur {
     credits: number; // Réintégré depuis HEAD pour éviter les régressions
     epargne: number;
     dateInscription: string;
+    email?: string;
 }
 
 export interface DonneesGraphique {
