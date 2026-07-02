@@ -61,14 +61,14 @@ export const agentsService = {
     },
 
     /**
-     * Supprimer un agent par son email
+     * Supprimer un agent par son *ID*
      */
-    delete: async (email: string): Promise<void> => {
-        await api.delete<ApiResponse<void>>(`/auth/deleteUser?email=${encodeURIComponent(email)}`);
+    delete: async (id: string | number): Promise<void> => {
+        await api.delete<ApiResponse<void>>(`/auth/delete-user/${id}`);
     },
 
     /**
-     * Suspendre un agent par son email
+     * Suspendre / réactiver un agent par son email (si l'endpoint utilise l'email)
      */
     suspendre: async (email: string): Promise<void> => {
         await api.patch<ApiResponse<void>>(`/Admin/change-status?email=${encodeURIComponent(email)}`);

@@ -23,8 +23,9 @@ import {
 import { useLangue } from "../../context/LangueContext";
 import { useTheme } from "../../context/ThemeContext";
 import Badge from "../../component/ui/Badge";
+import { agentsService } from "../../services/agentService";
 
-// Types
+// ─── Types ────────────────────────────────────────────────────────────────────
 type Statut = "actif" | "suspendu";
 type Vue = "tableau" | "cartes";
 
@@ -40,7 +41,7 @@ interface Agent {
     email?: string;
 }
 
-// Données mockées (utilisées SEULEMENT si VITE_USE_MOCK=true)
+// ─── Données mockées (utilisées SEULEMENT si VITE_USE_MOCK=true) ─────────────
 const AGENTS_MOCK: Agent[] = [
     {
         id: "AGT-001",
@@ -132,20 +133,40 @@ const AGENTS_MOCK: Agent[] = [
     },
 ];
 
-// Utilitaires
+// ─── Normalisation des données du serveur ────────────────────────────────────
+function mapServerAgent(serverAgent: any): Agent {
+    return {
+        id: String(serverAgent.id),
+        prenom: serverAgent.prenom,
+        nom: serverAgent.nom,
+        telephone: serverAgent.telephone,
+        ville: serverAgent.ville,
+        statut: serverAgent.statut?.toLowerCase() === "actif" ? "actif" : "suspendu",
+        login: serverAgent.login ?? serverAgent.email ?? "",
+        dateInscription: serverAgent.date_inscription ?? "",
+        email: serverAgent.email ?? "",
+    };
+}
+
+// ─── Utilitaires ──────────────────────────────────────────────────────────────
 function getInitials(prenom: string, nom: string): string {
     return ((prenom[0] ?? "") + (nom[0] ?? "")).toUpperCase();
 }
 
 function formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString("fr-FR", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-    });
+    if (!dateStr) return "";
+    try {
+        return new Date(dateStr).toLocaleDateString("fr-FR", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        });
+    } catch {
+        return dateStr;
+    }
 }
 
-// Composant ModaleProfilAgent (simplifié, sans dossiers)
+// ─── Composant ModaleProfilAgent (inchangé) ──────────────────────────────────
 interface ModaleProfilAgentProps {
     agent: Agent | null;
     onFermer: () => void;
@@ -179,7 +200,9 @@ const ModaleProfilAgent = ({ agent, onFermer, onToggleStatut, onSupprimer, t }: 
             >
                 <div
                     className="p-6 relative"
-                    style={{ background: "linear-gradient(135deg, #052e16, #15803d, #0c4a6e)" }}
+                    style={{
+                        background: "linear-gradient(135deg, #052e16, #15803d, #0c4a6e)",
+                    }}
                 >
                     <button
                         onClick={onFermer}
@@ -195,7 +218,10 @@ const ModaleProfilAgent = ({ agent, onFermer, onToggleStatut, onSupprimer, t }: 
                     <div className="flex items-center gap-4">
                         <div
                             className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shrink-0"
-                            style={{ background: "rgba(255,255,255,0.2)", boxShadow: "0 4px 12px rgba(0,0,0,0.2)" }}
+                            style={{
+                                background: "rgba(255,255,255,0.2)",
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                            }}
                         >
                             {getInitials(agent.prenom, agent.nom)}
                         </div>
@@ -224,7 +250,12 @@ const ModaleProfilAgent = ({ agent, onFermer, onToggleStatut, onSupprimer, t }: 
                                     valeur: agent.telephone,
                                     couleur: "#0891b2",
                                 },
-                                { icone: MapPin, label: at.ville || "Ville", valeur: agent.ville, couleur: "#8b5cf6" },
+                                {
+                                    icone: MapPin,
+                                    label: at.ville || "Ville",
+                                    valeur: agent.ville,
+                                    couleur: "#8b5cf6",
+                                },
                                 {
                                     icone: Briefcase,
                                     label: at.login || "Login",
@@ -242,14 +273,18 @@ const ModaleProfilAgent = ({ agent, onFermer, onToggleStatut, onSupprimer, t }: 
                                 <div key={info.label} className="flex items-center gap-3">
                                     <div
                                         className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                                        style={{ background: `${info.couleur}15` }}
+                                        style={{
+                                            background: `${info.couleur}15`,
+                                        }}
                                     >
                                         <info.icone size={14} style={{ color: info.couleur }} aria-hidden="true" />
                                     </div>
                                     <div className="flex-1 flex items-center justify-between">
                                         <p className="text-xs text-gray-400">{info.label}</p>
                                         <p
-                                            className={`text-sm font-semibold text-gray-800 dark:text-white ${info.mono ? "font-mono" : ""}`}
+                                            className={`text-sm font-semibold text-gray-800 dark:text-white ${
+                                                info.mono ? "font-mono" : ""
+                                            }`}
                                         >
                                             {info.valeur}
                                         </p>
@@ -261,7 +296,9 @@ const ModaleProfilAgent = ({ agent, onFermer, onToggleStatut, onSupprimer, t }: 
 
                     <div
                         className="h-px"
-                        style={{ background: "linear-gradient(90deg, transparent, rgba(22,163,74,0.2), transparent)" }}
+                        style={{
+                            background: "linear-gradient(90deg, transparent, rgba(22,163,74,0.2), transparent)",
+                        }}
                     />
 
                     <div className="flex gap-2 pt-2">
@@ -305,7 +342,7 @@ const ModaleProfilAgent = ({ agent, onFermer, onToggleStatut, onSupprimer, t }: 
     );
 };
 
-// Composant ModaleConfirmation
+// ─── Composant ModaleConfirmation (inchangé) ─────────────────────────────────
 interface ModaleConfirmationProps {
     type: "supprimer" | "statut";
     agent: Agent;
@@ -321,7 +358,10 @@ const ModaleConfirmation = ({ type, agent, onConfirmer, onAnnuler, t }: ModaleCo
     return (
         <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+            style={{
+                background: "rgba(0,0,0,0.5)",
+                backdropFilter: "blur(4px)",
+            }}
             onClick={onAnnuler}
         >
             <div
@@ -334,7 +374,13 @@ const ModaleConfirmation = ({ type, agent, onConfirmer, onAnnuler, t }: ModaleCo
                 onClick={(e) => e.stopPropagation()}
             >
                 <div
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto ${type === "supprimer" ? "bg-red-100 dark:bg-red-900/30" : agent.statut === "actif" ? "bg-amber-100 dark:bg-amber-900/30" : "bg-green-100 dark:bg-green-900/30"}`}
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto ${
+                        type === "supprimer"
+                            ? "bg-red-100 dark:bg-red-900/30"
+                            : agent.statut === "actif"
+                              ? "bg-amber-100 dark:bg-amber-900/30"
+                              : "bg-green-100 dark:bg-green-900/30"
+                    }`}
                 >
                     {type === "supprimer" ? (
                         <Trash2 size={22} className="text-red-500 dark:text-red-400" />
@@ -385,10 +431,9 @@ const ModaleConfirmation = ({ type, agent, onConfirmer, onAnnuler, t }: ModaleCo
     );
 };
 
-// Composant Principal
+// ─── Composant Principal ──────────────────────────────────────────────────────
 export default function AgentsTerrainPage() {
     const { t } = useLangue();
-    const { theme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -396,11 +441,9 @@ export default function AgentsTerrainPage() {
     const tc = (t as any).commun ?? {};
 
     const useMock = import.meta.env.VITE_USE_MOCK === "true";
-    const apiUrl = import.meta.env.VITE_API_URL || "http://192.168.9.228:8081/api";
 
     const [agents, setAgents] = useState<Agent[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [vue, setVue] = useState<Vue>("tableau");
     const [recherche, setRecherche] = useState("");
     const [filtreStatut, setFiltreStatut] = useState<"tous" | Statut>("tous");
@@ -411,32 +454,28 @@ export default function AgentsTerrainPage() {
     } | null>(null);
     const [messageSucces, setMessageSucces] = useState<string | null>(null);
 
-    // Chargement initial
+    // ✅ Chargement initial (mock ou service)
     useEffect(() => {
         if (useMock) {
             setAgents(AGENTS_MOCK);
             setLoading(false);
         } else {
             setLoading(true);
-            fetch(apiUrl)
-                .then((res) => {
-                    if (!res.ok) throw new Error(`Erreur ${res.status}`);
-                    return res.json();
-                })
-                .then((data: Agent[]) => {
-                    setAgents(data); // même vide
+            agentsService
+                .getAll()
+                .then((data) => {
+                    const normalises = data.map(mapServerAgent);
+                    setAgents(normalises);
                     setLoading(false);
                 })
-                .catch((err) => {
-                    // En cas d'erreur réseau/serveur, on affiche une liste vide
-                    console.warn("API indisponible, liste vide :", err);
+                .catch(() => {
                     setAgents([]);
                     setLoading(false);
                 });
         }
-    }, [useMock, apiUrl]);
+    }, [useMock]);
 
-    // Récupération après création
+    // ✅ Récupération après création (inchangé)
     useEffect(() => {
         const state = location.state as { nouvelAgent?: Agent; message?: string } | null;
 
@@ -469,22 +508,50 @@ export default function AgentsTerrainPage() {
     const totalActifs = agents.filter((a) => a.statut === "actif").length;
     const totalSuspendus = agents.filter((a) => a.statut === "suspendu").length;
 
+    // 🔁 Changement de statut avec appel API
     function toggleStatut(agent: Agent) {
-        setAgents((prev) =>
-            prev.map((a) => (a.id === agent.id ? { ...a, statut: a.statut === "actif" ? "suspendu" : "actif" } : a)),
-        );
-        setConfirmation(null);
-        if (agentSelectionne?.id === agent.id) {
-            setAgentSelectionne((prev) =>
-                prev ? { ...prev, statut: prev.statut === "actif" ? "suspendu" : "actif" } : null,
-            );
-        }
+        agentsService
+            .suspendre(agent.email ?? "")
+            .then(() => {
+                setAgents((prev) =>
+                    prev.map((a) =>
+                        a.id === agent.id ? { ...a, statut: a.statut === "actif" ? "suspendu" : "actif" } : a,
+                    ),
+                );
+                setConfirmation(null);
+                if (agentSelectionne?.id === agent.id) {
+                    setAgentSelectionne((prev) =>
+                        prev ? { ...prev, statut: prev.statut === "actif" ? "suspendu" : "actif" } : null,
+                    );
+                }
+                setMessageSucces(
+                    agent.statut === "actif" ? "✅ Agent suspendu avec succès." : "✅ Agent réactivé avec succès.",
+                );
+                setTimeout(() => setMessageSucces(null), 3000);
+            })
+            .catch((err) => {
+                console.error("Erreur changement de statut :", err);
+                setMessageSucces("❌ Erreur lors du changement de statut.");
+                setTimeout(() => setMessageSucces(null), 3000);
+            });
     }
 
+    // 🗑 Suppression avec appel API
     function supprimerAgent(agent: Agent) {
-        setAgents((prev) => prev.filter((a) => a.id !== agent.id));
-        setConfirmation(null);
-        if (agentSelectionne?.id === agent.id) setAgentSelectionne(null);
+        agentsService
+            .delete(agent.id)
+            .then(() => {
+                setAgents((prev) => prev.filter((a) => a.id !== agent.id));
+                setConfirmation(null);
+                if (agentSelectionne?.id === agent.id) setAgentSelectionne(null);
+                setMessageSucces("✅ Agent supprimé avec succès.");
+                setTimeout(() => setMessageSucces(null), 3000);
+            })
+            .catch((err) => {
+                console.error("Erreur suppression agent :", err);
+                setMessageSucces("❌ Erreur lors de la suppression.");
+                setTimeout(() => setMessageSucces(null), 3000);
+            });
     }
 
     const cartesResume = [
@@ -525,6 +592,7 @@ export default function AgentsTerrainPage() {
 
     return (
         <div className="space-y-6">
+            {/* Modales */}
             {agentSelectionne && (
                 <ModaleProfilAgent
                     agent={agentSelectionne}
@@ -553,12 +621,14 @@ export default function AgentsTerrainPage() {
                 <div
                     className="px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-3"
                     style={{
-                        background: "rgba(22,163,74,0.08)",
-                        border: "1px solid rgba(22,163,74,0.25)",
-                        color: "#16a34a",
+                        background: messageSucces.includes("❌") ? "rgba(239,68,68,0.08)" : "rgba(22,163,74,0.08)",
+                        border: messageSucces.includes("❌")
+                            ? "1px solid rgba(239,68,68,0.25)"
+                            : "1px solid rgba(22,163,74,0.25)",
+                        color: messageSucces.includes("❌") ? "#ef4444" : "#16a34a",
                     }}
                 >
-                    <CheckCircle size={16} />
+                    {messageSucces.includes("❌") ? <AlertCircle size={16} /> : <CheckCircle size={16} />}
                     <span>{messageSucces}</span>
                     <button
                         onClick={() => setMessageSucces(null)}
@@ -569,6 +639,7 @@ export default function AgentsTerrainPage() {
                 </div>
             )}
 
+            {/* Titre + bouton Nouvel agent */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                     <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
@@ -599,6 +670,7 @@ export default function AgentsTerrainPage() {
                 </button>
             </div>
 
+            {/* Cartes résumé */}
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {cartesResume.map((item) => (
                     <div key={item.id} className="carte flex items-center gap-4">
@@ -616,6 +688,7 @@ export default function AgentsTerrainPage() {
                 ))}
             </div>
 
+            {/* Barre d'outils */}
             <div className="flex flex-col sm:flex-row gap-3">
                 <div className="barre-recherche flex-1">
                     <Search size={16} className="shrink-0" style={{ color: "#16a34a" }} aria-hidden="true" />
@@ -654,14 +727,22 @@ export default function AgentsTerrainPage() {
                 <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl p-1 gap-1 shrink-0">
                     <button
                         onClick={() => setVue("tableau")}
-                        className={`p-2 rounded-lg transition-all ${vue === "tableau" ? "bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                        className={`p-2 rounded-lg transition-all ${
+                            vue === "tableau"
+                                ? "bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-sm"
+                                : "text-gray-400 hover:text-gray-600"
+                        }`}
                         title={at.vueTableau || "Vue tableau"}
                     >
                         <List size={15} />
                     </button>
                     <button
                         onClick={() => setVue("cartes")}
-                        className={`p-2 rounded-lg transition-all ${vue === "cartes" ? "bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                        className={`p-2 rounded-lg transition-all ${
+                            vue === "cartes"
+                                ? "bg-white dark:bg-gray-700 text-green-600 dark:text-green-400 shadow-sm"
+                                : "text-gray-400 hover:text-gray-600"
+                        }`}
                         title={at.vueCartes || "Vue cartes"}
                     >
                         <LayoutGrid size={15} />
@@ -669,11 +750,13 @@ export default function AgentsTerrainPage() {
                 </div>
             </div>
 
+            {/* Compteur */}
             <p className="text-xs text-gray-400 dark:text-gray-500">
                 {agentsFiltres.length} {tc.trouve || "trouvé(s)"} {tc.sur || "sur"} {agents.length}{" "}
                 {tc.total || "total"}
             </p>
 
+            {/* Vue Tableau */}
             {vue === "tableau" && (
                 <div className="table-container">
                     <div className="overflow-x-auto">
@@ -722,7 +805,9 @@ export default function AgentsTerrainPage() {
                                                     <button
                                                         onClick={() => setAgentSelectionne(agent)}
                                                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                                                        style={{ color: "#0891b2" }}
+                                                        style={{
+                                                            color: "#0891b2",
+                                                        }}
                                                         onMouseEnter={(e) =>
                                                             (e.currentTarget.style.background = "rgba(8,145,178,0.1)")
                                                         }
@@ -734,7 +819,12 @@ export default function AgentsTerrainPage() {
                                                         <span>{at.voir || "Voir"}</span>
                                                     </button>
                                                     <button
-                                                        onClick={() => setConfirmation({ type: "statut", agent })}
+                                                        onClick={() =>
+                                                            setConfirmation({
+                                                                type: "statut",
+                                                                agent,
+                                                            })
+                                                        }
                                                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
                                                         style={{
                                                             color: agent.statut === "actif" ? "#ef4444" : "#16a34a",
@@ -761,9 +851,16 @@ export default function AgentsTerrainPage() {
                                                         </span>
                                                     </button>
                                                     <button
-                                                        onClick={() => setConfirmation({ type: "supprimer", agent })}
+                                                        onClick={() =>
+                                                            setConfirmation({
+                                                                type: "supprimer",
+                                                                agent,
+                                                            })
+                                                        }
                                                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-                                                        style={{ color: "#ef4444" }}
+                                                        style={{
+                                                            color: "#ef4444",
+                                                        }}
                                                         onMouseEnter={(e) =>
                                                             (e.currentTarget.style.background = "rgba(239,68,68,0.1)")
                                                         }
@@ -785,9 +882,17 @@ export default function AgentsTerrainPage() {
                                         <td colSpan={4} className="px-6 py-12 text-center">
                                             <div
                                                 className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3"
-                                                style={{ background: "rgba(22,163,74,0.1)" }}
+                                                style={{
+                                                    background: "rgba(22,163,74,0.1)",
+                                                }}
                                             >
-                                                <Users size={22} style={{ color: "#16a34a" }} aria-hidden="true" />
+                                                <Users
+                                                    size={22}
+                                                    style={{
+                                                        color: "#16a34a",
+                                                    }}
+                                                    aria-hidden="true"
+                                                />
                                             </div>
                                             <p className="text-sm text-gray-500 dark:text-gray-400">
                                                 {at.aucunAgent || "Aucun agent trouvé."}
@@ -807,12 +912,15 @@ export default function AgentsTerrainPage() {
                 </div>
             )}
 
+            {/* Vue Cartes */}
             {vue === "cartes" &&
                 (agentsFiltres.length === 0 ? (
                     <div className="carte text-center py-12 space-y-4">
                         <div
                             className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto"
-                            style={{ background: "rgba(22,163,74,0.1)" }}
+                            style={{
+                                background: "rgba(22,163,74,0.1)",
+                            }}
                         >
                             <Users size={22} style={{ color: "#16a34a" }} aria-hidden="true" />
                         </div>
@@ -827,7 +935,9 @@ export default function AgentsTerrainPage() {
                                 <div className="flex items-start gap-3">
                                     <div
                                         className="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-bold shrink-0"
-                                        style={{ background: "linear-gradient(135deg, #16a34a, #0891b2)" }}
+                                        style={{
+                                            background: "linear-gradient(135deg, #16a34a, #0891b2)",
+                                        }}
                                     >
                                         {getInitials(agent.prenom, agent.nom)}
                                     </div>
@@ -860,7 +970,12 @@ export default function AgentsTerrainPage() {
                                         {at.voir || "Voir"}
                                     </button>
                                     <button
-                                        onClick={() => setConfirmation({ type: "statut", agent })}
+                                        onClick={() =>
+                                            setConfirmation({
+                                                type: "statut",
+                                                agent,
+                                            })
+                                        }
                                         className="p-2 rounded-xl border transition-all"
                                     ></button>
                                 </div>

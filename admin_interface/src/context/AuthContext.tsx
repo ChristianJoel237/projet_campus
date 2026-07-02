@@ -18,51 +18,51 @@ interface AuthProviderProps {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-    const [estConnecte, setEstConnecte] = useState<boolean>(() => !!sessionStorage.getItem("token"));
+    // Utilisation exclusive du localStorage pour une persistance stable
+    const [estConnecte, setEstConnecte] = useState<boolean>(() => !!localStorage.getItem("token"));
     const [chargement, setChargement] = useState<boolean>(false);
     const [erreurConnexion, setErreurConnexion] = useState<string>("");
-    const [nomAdmin, setNomAdmin] = useState<string>(() => sessionStorage.getItem("nomAdmin") || "Administrateur");
-    const [emailAdmin, setEmailAdmin] = useState<string>(() => sessionStorage.getItem("emailAdmin") || "");
+    const [nomAdmin, setNomAdmin] = useState<string>(() => localStorage.getItem("nomAdmin") || "Administrateur");
+    const [emailAdmin, setEmailAdmin] = useState<string>(() => localStorage.getItem("emailAdmin") || "");
 
     const seConnecter = async (email: string, password: string): Promise<boolean> => {
         setChargement(true);
         setErreurConnexion("");
 
         try {
-            // Appel au service avec le champ 'password' unifié
             const reponse = await authService.seConnecter(email, password);
-
             const token = reponse.token;
             const nomExtrait = email.split("@")[0];
 
-            sessionStorage.setItem("token", token);
-            sessionStorage.setItem("nomAdmin", nomExtrait);
-            sessionStorage.setItem("emailAdmin", email);
+            // Sauvegarde synchronisée dans localStorage
+            localStorage.setItem("token", token);
+            localStorage.setItem("nomAdmin", nomExtrait);
+            localStorage.setItem("emailAdmin", email);
 
             setNomAdmin(nomExtrait);
             setEmailAdmin(email);
             setEstConnecte(true);
-            setChargement(false);
             return true;
         } catch (erreur: any) {
-            // Capture le message d'erreur du serveur si disponible, sinon message par défaut
-            const message = erreur?.response?.data?.message || "❌ Email ou mot de passe incorrect.";
+            const message = erreur?.message || "❌ Identifiants incorrects.";
             setErreurConnexion(message);
-            setChargement(false);
             return false;
+        } finally {
+            setChargement(false);
         }
     };
 
     const seDeconnecter = (): void => {
         authService.deconnexion();
-        sessionStorage.removeItem("token");
-        sessionStorage.removeItem("nomAdmin");
-        sessionStorage.removeItem("emailAdmin");
+
+        // Nettoyage complet
+        localStorage.removeItem("token");
+        localStorage.removeItem("nomAdmin");
+        localStorage.removeItem("emailAdmin");
 
         setNomAdmin("Administrateur");
         setEmailAdmin("");
         setEstConnecte(false);
-        setErreurConnexion("");
     };
 
     return (
