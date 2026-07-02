@@ -5,9 +5,9 @@ export interface ReponseConnexion {
 }
 
 export const authService = {
-    seConnecter: async (email: string, motDePasse: string): Promise<ReponseConnexion> => {
+    seConnecter: async (email: string, password: string): Promise<ReponseConnexion> => {
         // On appelle l'API sans authentification (le token n'existe pas encore)
-        const reponse = await api.post<any>("/auth/login", { email, motDePasse }, false);
+        const reponse = await api.post<any>("/auth/login", { email, password }, false);
 
         // Extraction robuste du token selon le format renvoyé par le backend
         const token =
