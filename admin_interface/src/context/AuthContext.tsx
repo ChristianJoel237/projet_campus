@@ -7,7 +7,7 @@ interface AuthContextType {
     erreurConnexion: string;
     nomAdmin: string;
     emailAdmin: string;
-    seConnecter: (email: string, motDePasse: string) => Promise<boolean>;
+    seConnecter: (email: string, password: string) => Promise<boolean>;
     seDeconnecter: () => void;
 }
 
@@ -18,21 +18,20 @@ interface AuthProviderProps {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-    // Utilisation de sessionStorage pour la persistance limitée à l'onglet
     const [estConnecte, setEstConnecte] = useState<boolean>(() => !!sessionStorage.getItem("token"));
     const [chargement, setChargement] = useState<boolean>(false);
     const [erreurConnexion, setErreurConnexion] = useState<string>("");
     const [nomAdmin, setNomAdmin] = useState<string>(() => sessionStorage.getItem("nomAdmin") || "Administrateur");
     const [emailAdmin, setEmailAdmin] = useState<string>(() => sessionStorage.getItem("emailAdmin") || "");
 
-    const seConnecter = async (email: string, motDePasse: string): Promise<boolean> => {
+    const seConnecter = async (email: string, password: string): Promise<boolean> => {
         setChargement(true);
         setErreurConnexion("");
 
         try {
-            const reponse = await authService.seConnecter(email, motDePasse);
+            // Appel au service avec le champ 'password' unifié
+            const reponse = await authService.seConnecter(email, password);
 
-            // Extraction sécurisée selon le contrat de authService
             const token = reponse.token;
             const nomExtrait = email.split("@")[0];
 
@@ -45,8 +44,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             setEstConnecte(true);
             setChargement(false);
             return true;
-        } catch (erreur) {
-            const message = erreur instanceof Error ? erreur.message : "❌ Email ou mot de passe incorrect.";
+        } catch (erreur: any) {
+            // Capture le message d'erreur du serveur si disponible, sinon message par défaut
+            const message = erreur?.response?.data?.message || "❌ Email ou mot de passe incorrect.";
             setErreurConnexion(message);
             setChargement(false);
             return false;
@@ -54,9 +54,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     };
 
     const seDeconnecter = (): void => {
-        // Optionnel : Appel API pour invalider la session côté serveur
         authService.deconnexion();
-
         sessionStorage.removeItem("token");
         sessionStorage.removeItem("nomAdmin");
         sessionStorage.removeItem("emailAdmin");
