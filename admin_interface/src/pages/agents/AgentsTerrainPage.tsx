@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
+<<<<<<< HEAD
   Search, Filter, Eye, UserCheck, UserX, Trash2, Plus,
   Users, MapPin, Phone, Calendar, Briefcase, FileText,
   X, TrendingUp, CheckCircle, AlertCircle, LayoutGrid, List,
@@ -673,3 +674,659 @@ export default function AgentsTerrainPage() {
     </div>
   );
 }
+=======
+    Search,
+    Filter,
+    Eye,
+    UserCheck,
+    UserX,
+    Trash2,
+    Plus,
+    Users,
+    MapPin,
+    Briefcase,
+    Calendar,
+    X,
+    CheckCircle,
+    AlertCircle,
+    LayoutGrid,
+    List,
+    Phone,
+    RefreshCw,
+} from "lucide-react";
+import { useLangue } from "../../context/LangueContext";
+import { useTheme } from "../../context/ThemeContext";
+import { useAgents, Agent } from "../../context/AgentsContext";
+import Badge from "../../component/ui/Badge";
+
+type Vue = "tableau" | "cartes";
+
+function getInitials(prenom: string, nom: string): string {
+    return ((prenom?.[0] ?? "") + (nom?.[0] ?? "")).toUpperCase();
+}
+
+function formatDate(dateStr: string | undefined): string {
+    if (!dateStr) return "-";
+    return new Date(dateStr).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+    });
+}
+
+// ─── Modale profil agent ──────────────────────────────────────────────────────
+interface ModaleProfilAgentProps {
+    agent: Agent | null;
+    onFermer: () => void;
+    onToggleStatut: (agent: Agent) => void;
+    onSupprimer: (agent: Agent) => void;
+    t: any;
+}
+
+const ModaleProfilAgent = ({ agent, onFermer, onToggleStatut, onSupprimer, t }: ModaleProfilAgentProps) => {
+    const { theme } = useTheme();
+    const at = t.agentsTerrain ?? {};
+    if (!agent) return null;
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+            onClick={onFermer}
+            role="dialog"
+            aria-modal="true"
+        >
+            <div
+                className="w-full max-w-md rounded-2xl overflow-hidden"
+                style={{
+                    background: theme === "dark" ? "#111827" : "#ffffff",
+                    boxShadow: "0 24px 64px rgba(0,0,0,0.2)",
+                    border: theme === "dark" ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(22,163,74,0.15)",
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div
+                    className="p-6 relative"
+                    style={{ background: "linear-gradient(135deg, #052e16, #15803d, #0c4a6e)" }}
+                >
+                    <button
+                        onClick={onFermer}
+                        className="absolute top-4 right-4 w-8 h-8 rounded-xl flex items-center justify-center text-white"
+                        style={{ background: "rgba(255,255,255,0.15)" }}
+                    >
+                        <X size={16} />
+                    </button>
+                    <div className="flex items-center gap-4">
+                        <div
+                            className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shrink-0"
+                            style={{ background: "rgba(255,255,255,0.2)" }}
+                        >
+                            {getInitials(agent.prenom, agent.nom)}
+                        </div>
+                        <div>
+                            <h3 className="text-xl font-bold text-white">
+                                {agent.prenom} {agent.nom}
+                            </h3>
+                            <p className="text-xs font-mono text-white/60 mt-0.5">{agent.email}</p>
+                            <div className="flex items-center gap-2 mt-1.5">
+                                <Badge statut={agent.statut} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-6 space-y-5">
+                    <div>
+                        <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "#16a34a" }}>
+                            📋 {at.informationsAgent || "Informations de l'agent"}
+                        </p>
+                        <div className="space-y-3">
+                            {[
+                                {
+                                    icone: Phone,
+                                    label: at.telephone || "Téléphone",
+                                    valeur: agent.telephone,
+                                    couleur: "#0891b2",
+                                },
+                                { icone: MapPin, label: at.ville || "Ville", valeur: agent.ville, couleur: "#8b5cf6" },
+                                {
+                                    icone: Briefcase,
+                                    label: at.login || "Login",
+                                    valeur: agent.email?.split("@")[0] || "–",
+                                    couleur: "#F59E0B",
+                                    mono: true,
+                                },
+                                {
+                                    icone: Calendar,
+                                    label: at.dateInscription || "Inscription",
+                                    valeur: formatDate(agent.dateInscription),
+                                    couleur: "#6b7280",
+                                },
+                            ].map((info) => (
+                                <div key={info.label} className="flex items-center gap-3">
+                                    <div
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                                        style={{ background: `${info.couleur}15` }}
+                                    >
+                                        <info.icone size={14} style={{ color: info.couleur }} />
+                                    </div>
+                                    <div className="flex-1 flex items-center justify-between">
+                                        <p className="text-xs text-gray-400">{info.label}</p>
+                                        <p
+                                            className={`text-sm font-semibold text-gray-800 dark:text-white ${info.mono ? "font-mono" : ""}`}
+                                        >
+                                            {info.valeur}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                        {/* Bouton Suspendre uniquement si actif */}
+                        {agent.statut === "actif" && (
+                            <button
+                                onClick={() => {
+                                    onToggleStatut(agent);
+                                    onFermer();
+                                }}
+                                className="flex-1 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2"
+                                style={{
+                                    background: "rgba(239,68,68,0.1)",
+                                    border: "1px solid rgba(239,68,68,0.3)",
+                                    color: "#ef4444",
+                                }}
+                            >
+                                <UserX size={14} />
+                                {at.suspendre || "Suspendre"}
+                            </button>
+                        )}
+                        <button
+                            onClick={() => {
+                                onSupprimer(agent);
+                                onFermer();
+                            }}
+                            className="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
+                            style={{
+                                background: "rgba(239,68,68,0.1)",
+                                border: "1px solid rgba(239,68,68,0.3)",
+                                color: "#ef4444",
+                            }}
+                        >
+                            <Trash2 size={14} />
+                            {at.supprimer || "Supprimer"}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ─── Modale confirmation ──────────────────────────────────────────────────────
+interface ModaleConfirmationProps {
+    type: "supprimer" | "statut";
+    agent: Agent;
+    onConfirmer: () => void;
+    onAnnuler: () => void;
+    t: any;
+}
+
+const ModaleConfirmation = ({ type, agent, onConfirmer, onAnnuler, t }: ModaleConfirmationProps) => {
+    const { theme } = useTheme();
+    const at = t.agentsTerrain ?? {};
+
+    return (
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+            onClick={onAnnuler}
+        >
+            <div
+                className="w-full max-w-sm rounded-2xl p-5 space-y-4"
+                style={{
+                    background: theme === "dark" ? "#111827" : "#ffffff",
+                    boxShadow: "0 24px 64px rgba(0,0,0,0.2)",
+                    border: theme === "dark" ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(22,163,74,0.15)",
+                }}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div
+                    className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto ${
+                        type === "supprimer" ? "bg-red-100 dark:bg-red-900/30" : "bg-amber-100 dark:bg-amber-900/30"
+                    }`}
+                >
+                    {type === "supprimer" ? (
+                        <Trash2 size={22} className="text-red-500" />
+                    ) : (
+                        <UserX size={22} className="text-amber-600" />
+                    )}
+                </div>
+
+                <div className="text-center space-y-1">
+                    <p className="text-base font-bold text-gray-900 dark:text-white">
+                        {type === "supprimer"
+                            ? at.confirmerSupprimer || "Supprimer l'agent ?"
+                            : at.confirmerSuspendre || "Suspendre l'agent ?"}
+                    </p>
+                    <p className="text-sm font-semibold text-green-600">
+                        {agent.prenom} {agent.nom}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                        {type === "supprimer"
+                            ? at.confirmationSupprimer || "Cette action est irréversible."
+                            : at.confirmationStatut || "Vous pouvez modifier ce statut à tout moment."}
+                    </p>
+                </div>
+
+                <div className="flex gap-2 pt-1">
+                    <button
+                        onClick={onAnnuler}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300"
+                    >
+                        {t.commun?.annuler || "Annuler"}
+                    </button>
+                    <button
+                        onClick={onConfirmer}
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium text-white"
+                        style={{
+                            background: type === "supprimer" ? "#ef4444" : "linear-gradient(135deg, #16a34a, #0891b2)",
+                        }}
+                    >
+                        {t.commun?.confirmer || "Confirmer"}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// ─── Page principale ──────────────────────────────────────────────────────────
+export default function AgentsTerrainPage() {
+    const { t } = useLangue();
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const {
+        agents,
+        loading,
+        error,
+        fetchAgents,
+        supprimerAgent,
+        suspendreAgent, // 🆕 Suspension
+    } = useAgents();
+
+    const at = (t as any).agentsTerrain ?? {};
+    const tc = (t as any).commun ?? {};
+
+    const [vue, setVue] = useState<Vue>("tableau");
+    const [recherche, setRecherche] = useState("");
+    const [filtreStatut, setFiltreStatut] = useState<"tous" | "actif" | "suspendu">("tous");
+    const [agentSelectionne, setAgentSelectionne] = useState<Agent | null>(null);
+    const [confirmation, setConfirmation] = useState<{ type: "supprimer" | "statut"; agent: Agent } | null>(null);
+    const [messageSucces, setMessageSucces] = useState<string | null>(null);
+
+    // Réinitialise les filtres et recharge si la liste est vide au montage
+    useEffect(() => {
+        setRecherche("");
+        setFiltreStatut("tous");
+        if (agents.length === 0 && !loading && !error) {
+            fetchAgents();
+        }
+    }, []);
+
+    // Gestion du message de succès après création
+    useEffect(() => {
+        const state = location.state as { message?: string } | null;
+        if (state?.message) {
+            setMessageSucces(state.message);
+            fetchAgents();
+            window.history.replaceState({}, document.title);
+            setTimeout(() => setMessageSucces(null), 5000);
+        }
+    }, [location.state, fetchAgents]);
+
+    const agentsFiltres = useMemo(() => {
+        return agents.filter((a) => {
+            const q = recherche.toLowerCase();
+            const matchRecherche =
+                !q ||
+                `${a.prenom} ${a.nom}`.toLowerCase().includes(q) ||
+                a.ville?.toLowerCase().includes(q) ||
+                a.email?.toLowerCase().includes(q) ||
+                a.telephone?.includes(q);
+            const matchStatut = filtreStatut === "tous" || a.statut === filtreStatut;
+            return matchRecherche && matchStatut;
+        });
+    }, [agents, recherche, filtreStatut]);
+
+    const totalActifs = agents.filter((a) => a.statut === "actif").length;
+    const totalSuspendus = agents.filter((a) => a.statut === "suspendu").length;
+
+    const cartesResume = [
+        {
+            id: "total",
+            label: at.totalAgents || "Total agents",
+            valeur: agents.length,
+            couleur: "#16a34a",
+            fond: "rgba(22,163,74,0.1)",
+            icone: Users,
+        },
+        {
+            id: "actifs",
+            label: at.agentsActifs || "Actifs",
+            valeur: totalActifs,
+            couleur: "#16a34a",
+            fond: "rgba(22,163,74,0.1)",
+            icone: CheckCircle,
+        },
+        {
+            id: "suspendus",
+            label: at.agentsSuspendus || "Suspendus",
+            valeur: totalSuspendus,
+            couleur: "#F59E0B",
+            fond: "rgba(245,158,11,0.1)",
+            icone: AlertCircle,
+        },
+    ];
+
+    return (
+        <div className="space-y-6">
+            {/* Modales */}
+            {agentSelectionne && (
+                <ModaleProfilAgent
+                    agent={agentSelectionne}
+                    onFermer={() => setAgentSelectionne(null)}
+                    onToggleStatut={(a) => suspendreAgent(a.email)}
+                    onSupprimer={(a) => supprimerAgent(a.email)}
+                    t={t}
+                />
+            )}
+
+            {confirmation && (
+                <ModaleConfirmation
+                    type={confirmation.type}
+                    agent={confirmation.agent}
+                    onConfirmer={() => {
+                        if (confirmation.type === "supprimer") {
+                            supprimerAgent(confirmation.agent.email);
+                        } else if (confirmation.type === "statut") {
+                            suspendreAgent(confirmation.agent.email);
+                        }
+                        setConfirmation(null);
+                    }}
+                    onAnnuler={() => setConfirmation(null)}
+                    t={t}
+                />
+            )}
+
+            {/* Message de succès */}
+            {messageSucces && (
+                <div className="px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-3 bg-green-50 border border-green-200 text-green-700">
+                    <CheckCircle size={16} />
+                    <span>{messageSucces}</span>
+                </div>
+            )}
+
+            {/* Bannière d'erreur */}
+            {error && (
+                <div className="px-4 py-3 rounded-xl text-sm font-medium flex items-center justify-between gap-3 bg-red-50 border border-red-200 text-red-700">
+                    <div className="flex items-center gap-2">
+                        <AlertCircle size={16} />
+                        <span>
+                            {error === "Code d'erreur serveur : 403"
+                                ? "Accès refusé. Vérifiez vos droits d'administration."
+                                : error}
+                        </span>
+                    </div>
+                    <button
+                        onClick={() => fetchAgents()}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 transition-colors text-red-800 font-medium"
+                    >
+                        <RefreshCw size={14} />
+                        Réessayer
+                    </button>
+                </div>
+            )}
+
+            {/* En-tête */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                        {at.listeTitre || "Agents de terrain"}
+                    </h2>
+                    <p className="text-sm text-gray-400">
+                        {at.listeDescription || "Gérez les agents chargés des vérifications sur le terrain."}
+                    </p>
+                </div>
+                <button
+                    onClick={() => navigate("/agents/nouveau")}
+                    className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-white text-sm font-medium"
+                    style={{ background: "linear-gradient(135deg, #16a34a, #0891b2)" }}
+                >
+                    <Plus size={15} />
+                    {at.nouvelAgent || "Nouvel agent"}
+                </button>
+            </div>
+
+            {/* Cartes résumé */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {cartesResume.map((item) => (
+                    <div
+                        key={item.id}
+                        className="p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 flex items-center gap-4 shadow-sm"
+                    >
+                        <div
+                            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+                            style={{ background: item.fond }}
+                        >
+                            <item.icone size={20} style={{ color: item.couleur }} />
+                        </div>
+                        <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{item.label}</p>
+                            <p className="text-2xl font-bold text-gray-800 dark:text-white">{item.valeur}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Filtres + bascule de vue */}
+            <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex flex-1 items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5">
+                    <Search size={16} className="shrink-0" style={{ color: "#16a34a" }} />
+                    <input
+                        type="search"
+                        placeholder={at.recherche || "Rechercher par nom, ville, login..."}
+                        value={recherche}
+                        onChange={(e) => setRecherche(e.target.value)}
+                        className="bg-transparent text-sm text-gray-700 dark:text-gray-200 outline-none w-full"
+                    />
+                </div>
+
+                <div className="flex items-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5">
+                    <Filter size={16} style={{ color: "#16a34a" }} />
+                    <select
+                        value={filtreStatut}
+                        onChange={(e) => setFiltreStatut(e.target.value as any)}
+                        className="bg-transparent text-sm text-gray-700 dark:text-gray-200 outline-none"
+                    >
+                        <option value="tous">{at.tousStatuts || "Tous les statuts"}</option>
+                        <option value="actif">{at.statutActif || "Actif"}</option>
+                        <option value="suspendu">{at.statutSuspendu || "Suspendu"}</option>
+                    </select>
+                </div>
+
+                <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-xl p-1 gap-1 shrink-0">
+                    <button
+                        onClick={() => setVue("tableau")}
+                        className={`p-2 rounded-lg ${vue === "tableau" ? "bg-white dark:bg-gray-700 text-green-600 shadow-sm" : "text-gray-400"}`}
+                    >
+                        <List size={15} />
+                    </button>
+                    <button
+                        onClick={() => setVue("cartes")}
+                        className={`p-2 rounded-lg ${vue === "cartes" ? "bg-white dark:bg-gray-700 text-green-600 shadow-sm" : "text-gray-400"}`}
+                    >
+                        <LayoutGrid size={15} />
+                    </button>
+                </div>
+            </div>
+
+            {/* Indicateur de chargement */}
+            {loading && (
+                <div className="flex justify-center py-12">
+                    <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            )}
+
+            {/* Vue tableau */}
+            {!loading && vue === "tableau" && (
+                <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+                    <table className="w-full text-sm">
+                        <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-200 dark:border-gray-700 text-gray-500 font-medium">
+                            <tr>
+                                <th className="p-4 text-left">{at.colAgent || "Agent"}</th>
+                                <th className="p-4 text-left hidden md:table-cell">{at.colVille || "Ville"}</th>
+                                <th className="p-4 text-left">{at.colStatut || "Statut"}</th>
+                                <th className="p-4 text-center">{at.colActions || "Actions"}</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50 text-gray-700 dark:text-gray-200">
+                            {agentsFiltres.length > 0 ? (
+                                agentsFiltres.map((agent) => (
+                                    <tr
+                                        key={agent.email}
+                                        className="hover:bg-gray-50/50 dark:hover:bg-gray-700/20 transition-colors"
+                                    >
+                                        <td className="p-4">
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-xs shrink-0"
+                                                    style={{ background: "linear-gradient(135deg, #16a34a, #0891b2)" }}
+                                                >
+                                                    {getInitials(agent.prenom, agent.nom)}
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold">
+                                                        {agent.prenom} {agent.nom}
+                                                    </p>
+                                                    <p className="text-xs text-gray-400 font-mono">{agent.email}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="p-4 hidden md:table-cell">{agent.ville}</td>
+                                        <td className="p-4">
+                                            <Badge statut={agent.statut} />
+                                        </td>
+                                        <td className="p-4 text-center">
+                                            <div className="flex items-center justify-center gap-2">
+                                                <button
+                                                    onClick={() => setAgentSelectionne(agent)}
+                                                    className="p-1.5 text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950/30 rounded-lg"
+                                                    title="Voir"
+                                                >
+                                                    <Eye size={15} />
+                                                </button>
+                                                {/* Bouton Suspendre uniquement si actif */}
+                                                {agent.statut === "actif" && (
+                                                    <button
+                                                        onClick={() => setConfirmation({ type: "statut", agent })}
+                                                        className="p-1.5 rounded-lg text-amber-500 hover:bg-amber-50"
+                                                        title="Suspendre"
+                                                    >
+                                                        <UserX size={15} />
+                                                    </button>
+                                                )}
+                                                <button
+                                                    onClick={() => setConfirmation({ type: "supprimer", agent })}
+                                                    className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg"
+                                                    title="Supprimer"
+                                                >
+                                                    <Trash2 size={15} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={4} className="p-12 text-center text-gray-400">
+                                        {agents.length === 0 && !error
+                                            ? at.aucunAgent || "Aucun agent disponible"
+                                            : "Aucun résultat trouvé"}
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {/* Vue cartes */}
+            {!loading && vue === "cartes" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {agentsFiltres.length > 0 ? (
+                        agentsFiltres.map((agent) => (
+                            <div
+                                key={agent.email}
+                                className="p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm space-y-4"
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex items-center gap-3">
+                                        <div
+                                            className="w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold shrink-0"
+                                            style={{ background: "linear-gradient(135deg, #16a34a, #0891b2)" }}
+                                        >
+                                            {getInitials(agent.prenom, agent.nom)}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold truncate max-w-[140px]">
+                                                {agent.prenom} {agent.nom}
+                                            </p>
+                                            <p className="text-xs text-gray-400 font-mono">{agent.email}</p>
+                                        </div>
+                                    </div>
+                                    <Badge statut={agent.statut} />
+                                </div>
+                                <div className="text-xs space-y-1 text-gray-500 dark:text-gray-400 pt-1 border-t border-gray-100 dark:border-gray-700">
+                                    <p>📍 {agent.ville}</p>
+                                </div>
+                                <div className="flex gap-2 pt-2">
+                                    <button
+                                        onClick={() => setAgentSelectionne(agent)}
+                                        className="flex-1 py-1.5 bg-gray-50 hover:bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg text-xs font-medium flex items-center justify-center gap-1"
+                                    >
+                                        <Eye size={13} /> {at.voir || "Voir"}
+                                    </button>
+                                    {agent.statut === "actif" && (
+                                        <button
+                                            onClick={() => setConfirmation({ type: "statut", agent })}
+                                            className="p-1.5 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/30 border border-gray-100 dark:border-gray-700 rounded-lg"
+                                            title="Suspendre"
+                                        >
+                                            <UserX size={13} />
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => setConfirmation({ type: "supprimer", agent })}
+                                        className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 border border-gray-100 dark:border-gray-700 rounded-lg"
+                                    >
+                                        <Trash2 size={13} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="col-span-full p-12 text-center text-gray-400 text-sm">
+                            {agents.length === 0 && !error
+                                ? at.aucunAgent || "Aucun agent disponible"
+                                : "Aucun résultat trouvé"}
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
+>>>>>>> 417e06c (feat: migrer l'application et les composants de JS vers TypeScript)

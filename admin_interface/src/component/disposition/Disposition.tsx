@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import BarreLaterale from './BarreLaterale';
@@ -36,6 +37,31 @@ const Disposition = () => {
       </div>
     </div>
   );
+=======
+import { useState } from "react";
+import { Outlet } from "react-router-dom";
+import BarreNavigation from "./BarreNavigation";
+import BarreLaterale from "./BarreLaterale";
+
+const Disposition = () => {
+    const [recherche, setRecherche] = useState("");
+    const [barreOuverte, setBarreOuverte] = useState(false);
+
+    return (
+        <div className="flex h-screen bg-gray-50 dark:bg-gray-900 overflow-hidden">
+            <BarreLaterale estOuverte={barreOuverte} fermer={() => setBarreOuverte(false)} />
+
+            {/* AJOUT DE lg:pl-64 ICI POUR CORRIGER LE CHEVAUCHEMENT */}
+            <div className="flex flex-col flex-1 overflow-y-auto lg:pl-64">
+                <BarreNavigation ouvrirMenu={() => setBarreOuverte(true)} onRecherche={setRecherche} />
+
+                <main className="p-6">
+                    <Outlet context={recherche} />
+                </main>
+            </div>
+        </div>
+    );
+>>>>>>> 417e06c (feat: migrer l'application et les composants de JS vers TypeScript)
 };
 
 export default Disposition;

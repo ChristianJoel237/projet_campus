@@ -1,3 +1,4 @@
+<<<<<<< HEAD
  import { api } from './apiConfig';
 
 export interface ReponseConnexion {
@@ -30,6 +31,51 @@ export const authService = {
     localStorage.removeItem('estConnecte');
     window.location.href='/connexion'
   }
+=======
+import { api } from "./apiConfig";
+
+export interface ReponseConnexion {
+    token: string;
+}
+
+export const authService = {
+    seConnecter: async (email: string, password: string): Promise<ReponseConnexion> => {
+        // Appel sans authentification préalable (le token n'existe pas encore)
+        const reponse = await api.post<any>("/auth/login", { email, password }, false);
+        console.log("Réponse brute login :", reponse);
+
+        // Cherche le token à différents endroits possibles
+        const token =
+            reponse?.access_token || // <-- c'est celui que le serveur envoie
+            reponse?.token ||
+            reponse?.donnees?.token ||
+            reponse?.data?.token ||
+            reponse?.accessToken ||
+            null;
+
+        if (!token) {
+            throw new Error("Aucun token reçu du serveur");
+        }
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("estConnecte", "true");
+        return { token };
+    },
+
+    deconnexion: async (): Promise<void> => {
+        try {
+            await api.post("/auth/logout");
+        } catch (erreur) {
+            console.warn("Déconnexion côté serveur impossible :", erreur);
+        } finally {
+            localStorage.removeItem("token");
+            localStorage.removeItem("estConnecte");
+            localStorage.removeItem("nomAdmin");
+            localStorage.removeItem("emailAdmin");
+            window.location.href = "/connexion";
+        }
+    },
+>>>>>>> 417e06c (feat: migrer l'application et les composants de JS vers TypeScript)
 };
 
 export default authService;
