@@ -18,19 +18,26 @@ interface RouteProps {
     children: ReactNode;
 }
 
-// Composant de protection pour les routes nécessitant une authentification
 const RouteProtegee = ({ children }: RouteProps) => {
-    const { estConnecte } = useAuth();
+    const { estConnecte, chargement } = useAuth();
+
+    if (chargement) {
+        return <div style={{ padding: "20px", textAlign: "center" }}>Vérification de la session...</div>;
+    }
+
     return estConnecte ? <>{children}</> : <Navigate to="/connexion" replace />;
 };
 
-// Composant pour restreindre l'accès aux pages publiques (ex: Connexion) quand on est déjà logué
 const RoutePublique = ({ children }: RouteProps) => {
-    const { estConnecte } = useAuth();
+    const { estConnecte, chargement } = useAuth();
+
+    if (chargement) {
+        return <div style={{ padding: "20px", textAlign: "center" }}>Vérification de la session...</div>;
+    }
+
     return !estConnecte ? <>{children}</> : <Navigate to="/" replace />;
 };
 
-// Wrapper pour injecter le contexte des agents uniquement dans l'espace sécurisé
 const ZoneSecuriseeAgents = () => {
     return (
         <AgentsProvider>

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { authService } from "../services/authService";
 
 interface AuthContextType {
@@ -18,12 +18,20 @@ interface AuthProviderProps {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-    // Utilisation exclusive du localStorage pour une persistance stable
-    const [estConnecte, setEstConnecte] = useState<boolean>(() => !!localStorage.getItem("token"));
+    // SessionStorage garantit la déconnexion à la fermeture de l'onglet/navigateur
+    const [estConnecte, setEstConnecte] = useState<boolean>(() => !!sessionStorage.getItem("token"));
     const [chargement, setChargement] = useState<boolean>(false);
     const [erreurConnexion, setErreurConnexion] = useState<string>("");
-    const [nomAdmin, setNomAdmin] = useState<string>(() => localStorage.getItem("nomAdmin") || "Administrateur");
-    const [emailAdmin, setEmailAdmin] = useState<string>(() => localStorage.getItem("emailAdmin") || "");
+    const [nomAdmin, setNomAdmin] = useState<string>(() => sessionStorage.getItem("nomAdmin") || "Administrateur");
+    const [emailAdmin, setEmailAdmin] = useState<string>(() => sessionStorage.getItem("emailAdmin") || "");
+
+    // Synchronisation de l'état si le token est supprimé d'un autre onglet ou expire
+    useEffect(() => {
+        const token = sessionStorage.getItem("token");
+        if (!token && estConnecte) {
+            setEstConnecte(false);
+        }
+    }, [estConnecte]);
 
     const seConnecter = async (email: string, password: string): Promise<boolean> => {
         setChargement(true);
@@ -34,10 +42,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             const token = reponse.token;
             const nomExtrait = email.split("@")[0];
 
-            // Sauvegarde synchronisée dans localStorage
-            localStorage.setItem("token", token);
-            localStorage.setItem("nomAdmin", nomExtrait);
-            localStorage.setItem("emailAdmin", email);
+            // Alignement strict sur sessionStorage
+            sessionStorage.setItem("token", token);
+            sessionStorage.setItem("nomAdmin", nomExtrait);
+            sessionStorage.setItem("emailAdmin", email);
 
             setNomAdmin(nomExtrait);
             setEmailAdmin(email);
@@ -55,10 +63,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const seDeconnecter = (): void => {
         authService.deconnexion();
 
-        // Nettoyage complet
-        localStorage.removeItem("token");
-        localStorage.removeItem("nomAdmin");
-        localStorage.removeItem("emailAdmin");
+        // Nettoyage complet du sessionStorage
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("nomAdmin");
+        sessionStorage.removeItem("emailAdmin");
 
         setNomAdmin("Administrateur");
         setEmailAdmin("");

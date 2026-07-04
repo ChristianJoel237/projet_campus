@@ -46,7 +46,6 @@ export const authService = {
             sessionStorage.removeItem("estConnecte");
             sessionStorage.removeItem("nomAdmin");
             sessionStorage.removeItem("emailAdmin");
-            window.location.href = "/connexion";
         }
     },
 };
