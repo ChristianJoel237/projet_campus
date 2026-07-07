@@ -10,6 +10,7 @@ import {
     HelpCircle,
     LogOut,
     UserCheck,
+    Settings,
 } from "lucide-react";
 import { useLangue } from "../../context/LangueContext";
 import { useAuth } from "../../context/AuthContext";
@@ -81,6 +82,13 @@ const BarreLaterale = ({ estOuverte, fermer }: BarreLateraleProps) => {
             icone: BarChart2,
             couleur: "#f97316",
             ombre: "rgba(249,115,22,0.4)",
+        },
+        {
+            nom: t.navigation?.parametres || "Paramètres",
+            chemin: "/parametres",
+            icone: Settings,
+            couleur: "#6366f1",
+            ombre: "rgba(99,102,241,0.4)",
         },
         {
             nom: t.navigation?.aide || "Aide",
@@ -171,7 +179,7 @@ const BarreLaterale = ({ estOuverte, fermer }: BarreLateraleProps) => {
                         <div className="p-1.5 rounded-lg bg-red-500/15 shrink-0">
                             <LogOut size={15} className="text-red-400" />
                         </div>
-                        <span>{t.parametres?.seDeconnecter || "Déconnexion"}</span>
+                        <span>{t.commun?.deconnexion || "Déconnexion"}</span>
                     </button>
                 </div>
             </aside>

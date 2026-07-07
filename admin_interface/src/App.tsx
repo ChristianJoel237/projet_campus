@@ -13,6 +13,7 @@ import { useAuth } from "./context/AuthContext";
 import AgentInscription from "./pages/agents/AgentInscription";
 import AgentsTerrainPage from "./pages/agents/AgentsTerrainPage";
 import { AgentsProvider } from "./context/AgentsContext";
+import Parametres from "./pages/parametres";
 
 interface RouteProps {
     children: ReactNode;
@@ -77,6 +78,7 @@ const App = () => {
                     <Route path="transactions" element={<Transactions />} />
                     <Route path="rapports" element={<Rapports />} />
                     <Route path="aide" element={<Aide />} />
+                    <Route path="parametres" element={<Parametres />} />
 
                     {/* Sous-Zone Sécurisée : Gestion des Agents avec injection du Provider dédiée */}
                     <Route element={<ZoneSecuriseeAgents />}>

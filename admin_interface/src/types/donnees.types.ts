@@ -38,7 +38,7 @@ export interface Utilisateur {
     telephone: string;
     ville: string;
     statut: StatutUtilisateur;
-    credits: number; // Réintégré depuis HEAD pour éviter les régressions
+    credits: number;
     epargne: number;
     dateInscription: string;
     email?: string;
@@ -65,4 +65,11 @@ export interface DashboardData {
     donneesGraphique: DonneesGraphique[];
     transactionsRecents: Transaction[];
     creditsRecents: Credit[];
+}
+
+export interface ParametresMicrofinance {
+    soldeMinimumRetrait: number;
+    tauxEpargneAnnuel: number;
+    tauxInteretCreditAnnuel: number;
+    dateModification: string;
 }

@@ -1,7 +1,6 @@
 // src/donnees/donneesFictives.ts
 import { Utilisateur } from "../types/donnees.types";
 import { Agent } from "../context/AgentsContext";
-
 export interface Statisiques {
     totalUtilisateurs: number;
     creditsActifs: number;
@@ -463,3 +462,17 @@ export const agents: Agent[] = [
         email: "s.ndi@microfinance.local",
     },
 ];
+
+export interface ParametresMicrofinance {
+    soldeMinimumRetrait: number;
+    tauxEpargneAnnuel: number;
+    tauxInteretCreditAnnuel: number;
+    dateModification: string;
+}
+
+export const parametres: ParametresMicrofinance = {
+    soldeMinimumRetrait: 5000,
+    tauxEpargneAnnuel: 3.5,
+    tauxInteretCreditAnnuel: 12,
+    dateModification: "2025-01-15T10:30:00",
+};
