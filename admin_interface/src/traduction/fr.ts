@@ -133,6 +133,8 @@ export const fr = {
         tousTypes: "Tous les types",
         quotidienne: "Quotidienne",
         hebdomadaire: "Hebdomadaire",
+        mensuelle: "Mensuelle",
+        aucune: "Aucune",
     },
     transactions: {
         titre: "Transactions",

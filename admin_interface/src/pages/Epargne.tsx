@@ -1,9 +1,9 @@
 // pages/Epargnes.tsx
-import { useState, useEffect } from "react";
-import { Search, Filter, TrendingUp, PiggyBank, Calendar, Users, LucideIcon } from "lucide-react";
+import { useState, useEffect, CSSProperties } from "react";
+import { Search, Filter, TrendingUp, PiggyBank, Users, LucideIcon } from "lucide-react";
 import { useEpargnes } from "../hooks/useEpargnes";
 import { useLangue } from "../context/LangueContext";
-import { Epargne } from "../types/donnees.types";
+import { Epargne, TypeEpargne } from "../types/donnees.types";
 
 interface CarteResume {
     id: string;
@@ -13,6 +13,14 @@ interface CarteResume {
     couleur: string;
     fond: string;
 }
+
+// Clés CSS standards utilisées pour valider le typage strict de TypeScript
+const STYLE_TYPE_EPARGNE: Record<TypeEpargne, CSSProperties> = {
+    JOURNALIERE: { color: "#0891b2", backgroundColor: "rgba(8,145,178,0.1)" },
+    HEBDOMADAIRE: { color: "#8b5cf6", backgroundColor: "rgba(139,92,246,0.1)" },
+    MENSUELLE: { color: "#d97706", backgroundColor: "rgba(217,119,6,0.1)" },
+    AUCUNE: { color: "#6b7280", backgroundColor: "rgba(107,114,128,0.1)" },
+};
 
 const Epargnes = () => {
     const { t } = useLangue();
@@ -27,19 +35,28 @@ const Epargnes = () => {
         }
     }, [epargnesServeur]);
 
-    // Filtrage dynamique pour le tableau et le traitement du meilleur épargnant
+    // Libellé traduit pour un type d'épargne donné
+    const libelleType = (type: TypeEpargne): string => {
+        const cles: Record<TypeEpargne, string> = {
+            JOURNALIERE: t.epargnes?.quotidienne || "Quotidienne",
+            HEBDOMADAIRE: t.epargnes?.hebdomadaire || "Hebdomadaire",
+            MENSUELLE: t.epargnes?.mensuelle || "Mensuelle",
+            AUCUNE: t.epargnes?.aucune || "Aucune",
+        };
+        return cles[type];
+    };
+
+    const nomAffiche = (e: Epargne): string => e.utilisateur ?? "Utilisateur inconnu";
+
     const epargnesFiltrees = listeEpargnes.filter((e) => {
-        const correspondRecherche = e.utilisateur.toLowerCase().includes(recherche.toLowerCase());
+        const correspondRecherche = nomAffiche(e).toLowerCase().includes(recherche.toLowerCase());
         const correspondType = filtreType === "tous" || e.typeEpargne === filtreType;
         return correspondRecherche && correspondType;
     });
 
-    // Indicateurs globaux stables pour le tableau de bord
     const totalEpargne = listeEpargnes.reduce((acc: number, e: Epargne) => acc + e.solde, 0);
-    const totalDepots = listeEpargnes.reduce((acc: number, e: Epargne) => acc + e.nombreDepots, 0);
     const moyenneEpargne = listeEpargnes.length > 0 ? Math.round(totalEpargne / listeEpargnes.length) : 0;
 
-    // Meilleur épargnant calculé parmi les éléments filtrés
     const epargnantActif = epargnesFiltrees.reduce(
         (max: Epargne | null, e: Epargne) => {
             if (!max) return e;
@@ -73,14 +90,6 @@ const Epargnes = () => {
             couleur: "#0891b2",
             fond: "rgba(8,145,178,0.1)",
         },
-        {
-            id: "depots",
-            label: t.epargnes?.totalDepots || "Total Dépôts",
-            valeur: totalDepots,
-            icone: Calendar,
-            couleur: "#8b5cf6",
-            fond: "rgba(139,92,246,0.1)",
-        },
     ];
 
     return (
@@ -92,7 +101,7 @@ const Epargnes = () => {
             </div>
 
             {/* Cartes résumé */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 {cartesResume.map((item) => {
                     const Icone = item.icone;
                     return (
@@ -131,16 +140,15 @@ const Epargnes = () => {
                             className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl shrink-0"
                             style={{ background: "rgba(255,255,255,0.2)" }}
                         >
-                            {epargnantActif.utilisateur.charAt(0)}
+                            {nomAffiche(epargnantActif).charAt(0)}
                         </div>
                         <div>
                             <p className="text-xs font-semibold" style={{ color: "rgba(255,255,255,0.75)" }}>
                                 ⭐ {t.epargnes?.meilleurEpargnant || "Meilleur épargnant"}
                             </p>
-                            <p className="text-lg font-bold text-white">{epargnantActif.utilisateur}</p>
+                            <p className="text-lg font-bold text-white">{nomAffiche(epargnantActif)}</p>
                             <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.75)" }}>
-                                {new Intl.NumberFormat("fr-FR").format(epargnantActif.solde)} FCFA •{" "}
-                                {epargnantActif.nombreDepots} {t.epargnes?.nbDepots || "dépôts"}
+                                {new Intl.NumberFormat("fr-FR").format(epargnantActif.solde)} FCFA
                             </p>
                         </div>
                     </div>
@@ -169,8 +177,10 @@ const Epargnes = () => {
                         className="bg-transparent text-sm text-gray-700 dark:text-gray-200 outline-none"
                     >
                         <option value="tous">{t.epargnes?.tousTypes || "Tous les types"}</option>
-                        <option value="quotidienne">{t.epargnes?.quotidienne || "Quotidienne"}</option>
-                        <option value="hebdomadaire">{t.epargnes?.hebdomadaire || "Hebdomadaire"}</option>
+                        <option value="JOURNALIERE">{libelleType("JOURNALIERE")}</option>
+                        <option value="HEBDOMADAIRE">{libelleType("HEBDOMADAIRE")}</option>
+                        <option value="MENSUELLE">{libelleType("MENSUELLE")}</option>
+                        <option value="AUCUNE">{libelleType("AUCUNE")}</option>
                     </select>
                 </div>
             </div>
@@ -185,8 +195,6 @@ const Epargnes = () => {
                                     { id: "epargnant", label: t.epargnes?.epargnants || "Épargnants" },
                                     { id: "type", label: t.epargnes?.typeEpargne || "Type d'épargne" },
                                     { id: "solde", label: t.epargnes?.solde || "Solde" },
-                                    { id: "depots", label: t.epargnes?.nbDepots || "Nb. Dépôts" },
-                                    { id: "dernier", label: t.epargnes?.dernierDepot || "Dernier Dépôt" },
                                 ].map((col) => (
                                     <th key={col.id} className="entete-tableau">
                                         {col.label}
@@ -204,41 +212,29 @@ const Epargnes = () => {
                                                     className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-xs shrink-0"
                                                     style={{ background: "linear-gradient(135deg, #F59E0B, #d97706)" }}
                                                 >
-                                                    {e.utilisateur.charAt(0)}
+                                                    {nomAffiche(e).charAt(0)}
                                                 </div>
                                                 <p className="font-semibold text-gray-800 dark:text-white">
-                                                    {e.utilisateur}
+                                                    {nomAffiche(e)}
                                                 </p>
                                             </div>
                                         </td>
                                         <td className="cellule-tableau">
                                             <span
                                                 className="px-2.5 py-1 rounded-lg text-xs font-semibold"
-                                                style={
-                                                    e.typeEpargne === "quotidienne"
-                                                        ? { background: "rgba(8,145,178,0.1)", color: "#0891b2" }
-                                                        : { background: "rgba(139,92,246,0.1)", color: "#8b5cf6" }
-                                                }
+                                                style={STYLE_TYPE_EPARGNE[e.typeEpargne]}
                                             >
-                                                {e.typeEpargne === "quotidienne"
-                                                    ? t.epargnes?.quotidienne || "Quotidienne"
-                                                    : t.epargnes?.hebdomadaire || "Hebdomadaire"}
+                                                {libelleType(e.typeEpargne)}
                                             </span>
                                         </td>
                                         <td className="cellule-tableau font-bold" style={{ color: "#16a34a" }}>
                                             {new Intl.NumberFormat("fr-FR").format(e.solde)} FCFA
                                         </td>
-                                        <td className="cellule-tableau font-semibold text-gray-700 dark:text-gray-300">
-                                            {e.nombreDepots}
-                                        </td>
-                                        <td className="cellule-tableau text-gray-500 dark:text-gray-400">
-                                            {e.dernierDepot}
-                                        </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center">
+                                    <td colSpan={3} className="px-6 py-12 text-center">
                                         <div
                                             className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3"
                                             style={{ background: "rgba(245,158,11,0.1)" }}

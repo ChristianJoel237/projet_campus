@@ -11,13 +11,14 @@ export interface Transaction {
     statut: string;
 }
 
+export type TypeEpargne = "AUCUNE" | "JOURNALIERE" | "HEBDOMADAIRE" | "MENSUELLE";
 export interface Epargne {
     id: number;
-    utilisateur: string;
-    typeEpargne: string;
+    utilisateur?: string;
+    typeEpargne: TypeEpargne;
     solde: number;
-    nombreDepots: number;
-    dernierDepot: string;
+    nombreDepots?: number;
+    dernierDepot?: string;
 }
 
 export interface Credit {

@@ -133,6 +133,8 @@ export const en = {
         tousTypes: "All types",
         quotidienne: "Daily",
         hebdomadaire: "Weekly",
+        mensuelle: "Monthly",
+        aucune: "None",
     },
     transactions: {
         titre: "Transactions",

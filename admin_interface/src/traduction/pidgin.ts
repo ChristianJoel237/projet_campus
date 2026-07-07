@@ -133,6 +133,8 @@ export const pidgin = {
         tousTypes: "All types",
         quotidienne: "Every day",
         hebdomadaire: "Every week",
+        mensuelle: "Every month",
+        aucune: "None",
     },
     transactions: {
         titre: "Transactions",
